@@ -1,0 +1,96 @@
+- questions
+    - id
+    - question_title
+    - first_post_id
+    - accepted_answer_id ( 0 = open question, else the id of the post accepted as answer)
+    - user_id
+    - timestamp
+- posts
+    - id
+    - post_content
+    - votes
+    - user_id
+    - question_id //post in a question with id = ...
+    - timestamp
+- comments
+    - id
+    - comment
+    - votes
+    - user_id
+    - post_id //comments of post with id = ...
+    - timestamp
+- tags
+    - id
+    - tag
+
+Relationship:
+Question 1-n post
+post 1-n comment
+
+- question_has_tags
+    - question_id (primary)
+    - tag_id      (primary)
+- user_voted_posts (artisan make:migration create_user_voted_posts_table --create=user_voted_posts)
+    - user_id (primary)
+    - post_id (primary)
+- user_voted_comments
+    - user_id (primary)
+    - comment_id (primary)
+
+Tiap question bisa punya banyak tag
+Tiap post bisa dikasih comment
+
+
+- buat profile page
+- buat form insert new question
+- buat question page
+    - bisa comment post
+    - bisa post sesuatu sebagai answer
+    - bisa upvote tiap post (kalau first post, dianggap upvote question)
+
+=======
+Done
+
+=======
+- Complete index page:
+    - infinite scroll by using AJAX OR pagination
+    - fetch data dynamically when changing category (recent, trending, open, etc).
+    - 10 items per fetch
+
+- Ask question function:
+    - DONE!
+
+- View question page:
+    - Vote each post (DONE!)
+    - Unvote each post (DONE!)
+    - Give answer (DONE!)
+    - Accept as answer (if session is question asker) (DONE!)
+    - Give comment (optional)
+    - Vote each comment (optional)
+
+- View by tag:
+    - DONE!
+- Design about page
+    - DONE!
+- Design readme.md
+    -
+
+- User profile:
+    - show email (DONE!)
+    - join date (DONE!)
+    - admin status (DONE!)
+    - change password (DONE!)
+
+- Escape to dismiss notification (DONE!)
+
+- Admin stuffs:
+    - Add tags (DONE!)
+    - Edit question
+    - Edit post
+    - Edit comment
+    - Delete question
+    - Delete post
+    - Delete comment
+
+
+
