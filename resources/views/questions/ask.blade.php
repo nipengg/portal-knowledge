@@ -52,11 +52,12 @@
         <div class="form-group label-floating">
             <label class="control-label" for="category">Category</label>
             <select class="form-control" id="category_name" name="category_name" required="">
-                @foreach($category as $user)   
-                    <option value="{{$user->category_name}}">{{$user->category_name}}</option>
-                @endforeach
+                <option value="LEFO">LEFO</option>
+                <option value="Review">Review</option>
             </select>
+        <div id="time">
             Estimated Time : <input type="datetime-local" name="estimated" id="estimated" required>
+        </div>
         </div>     
         <div class="form-group label-floating">
             <label class="control-label" for="admin">Admin</label>
@@ -102,7 +103,8 @@
                     <option value="konfidensial">Konfidensial</option>
         </select>
         </div>
-
+        
+        <div hidden id="user">
         <div class="form-group" id="tags-div">
             Tag people: <span class="tag-error">You need to use at least one user!</span>
             <select class="tags-picker form-control" id="users" name="users[]" multiple>
@@ -117,10 +119,50 @@
                     placeholder: 'Type something to start',
                     searchFromStart: false,
                     displayNoResultsMessage: true,
-                    noResultsMessageText: '&nbsp; No tags found. Try typing different term.'
+                    noResultsMessageText: '&nbsp; No users found. Try typing different User.'
                 });
             </script>
         </div>
+        </div>
+
+        <div hidden id="department">
+            <div class="form-group" id="tags-div">
+                Tag Department: <span class="tag-error">You need to use at least one department!</span>
+                <select class="tags-picker form-control" id="departments" name="departments[]" multiple>
+                    @foreach($department as $department)
+                        <option value="{{$department->department_id}}">{{$department->department_name}}</option>
+                    @endforeach
+                </select>
+                <script>
+                    $(".tags-picker").tokenize2({
+                        tokensMaxItems: 5,
+                        dataSource: 'select',
+                        placeholder: 'Type something to start',
+                        searchFromStart: false,
+                        displayNoResultsMessage: true,
+                        noResultsMessageText: '&nbsp; No departments found. Try typing different Department.'
+                    });
+                </script>
+            </div>
+            </div>
+
+        <script type="text/javascript">
+            $(document).ready(function() {
+                $('#security').change(function () {
+                    $(this).find("option:selected").each(function(){
+                        var optionValue = $(this).attr("value");
+                        if(optionValue === 'konfidensial'){
+                            $("#user").show();
+                            $("#department").show();
+                        } 
+                        else if(optionValue === 'sharing'){
+                            $("#user").hide();
+                            $("#department").hide();
+                        }
+                    });
+                });
+            });
+        </script>
 
         <div class="form-group label-floating">  
             <button type="submit" id="btn-custom" class="btn-block btn btn-primary">Submit Request</button>

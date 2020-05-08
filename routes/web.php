@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
 
 Route::get('/', 'MainController@index');
+Route::get('/done', 'MainController@done');
 Route::get('/question/category/{category}', 'MainController@tagCategory');
 Route::get('/login', function(){
     if(Session::has('username')) return redirect()->action('MainController@index');
@@ -42,21 +43,32 @@ Route::post('/qa/accept-answer', 'QaController@acceptAnswer');
 
 Route::resource('article','ArticleController');
 Route::get('/articles', 'ArticleController@articleform');
+Route::get('/articles/approve', 'ArticleController@approve');
+Route::get('/articles/approve/view/{id}', 'ArticleController@approveview');
 Route::get('/articles/{id}', 'ArticleController@personal');
+Route::get('/articles/department/{id}', 'ArticleController@department');
 Route::get('/articles/tag/{id}', 'ArticleController@articleformtag');
 Route::get('/articles/view/{id}', 'ArticleController@articleview');
 Route::get('/articles/edit/{id}', 'ArticleController@articleEditForm');
 Route::post('/article/edit/id/{id}', 'ArticleController@articleEdit');
 Route::get('/articles/delete/{id}', 'ArticleController@delete');
-Route::get('/articles/search', 'ArticleController@search');
+Route::get('/articles/approved/{id}', 'ArticleController@approved');
+Route::get('/articless/search', 'ArticleController@search');
 
 Route::get('/users', 'UserController@userform');
 Route::get('/users/edit/{id}', 'UserController@userEditForm');
 Route::post('/users/edit/id/{id}', 'UserController@userEdit');
 Route::post('/users/approved/{id}', 'UserController@approve');
+Route::get('/users/approved/admin/{id}', 'UserController@approveadmin');
 Route::post('/users/reject/{id}', 'UserController@reject');
 Route::post('/users/inactive/{id}', 'UserController@inactive');
 Route::get('/users/delete/{id}', 'UserController@destroy');
+
+Route::get('topics', 'TopicController@index');
+Route::get('/topics/create','TopicController@create');
+Route::get('/topics/update/{id}','TopicController@update');
+Route::post('/topics/update/id/{id}', 'TopicController@edit');
+Route::post('/topics/store','TopicController@store');
 
 Route::get('departments', 'DepartmentController@index');
 Route::get('/departments/edit/{id}', 'DepartmentController@edit');
@@ -79,8 +91,10 @@ Route::get('/sumber/create','SumberController@create');
 Route::post('/sumber/store','SumberController@store');
 
 Route::get('/question/search','MainController@search');
+Route::get('/done/search','MainController@searchdone');
 Route::get('/question/{question}', 'MainController@question');
 Route::get('/question/tag/{id}', 'MainController@personal');
+Route::get('/question/tag/department/{id}', 'MainController@department');
 Route::get('/question/edit/{question}', 'QuestionController@questionEditForm');
 Route::get('/question/rating/{id}', 'QuestionController@rating');
 Route::post('/question/edit/id/{question}/{first_post}', 'QuestionController@questionEdit');
@@ -99,6 +113,12 @@ Route::post('/themes/active/{id}', 'ThemeController@active');
 Route::post('/themes/inactive/{id}', 'ThemeController@inactive');
 Route::get('/themes/create','ThemeController@create');
 Route::post('/themes/store','ThemeController@store');
+
+Route::get('/search', 'SearchController@index');
+
+Route::get('/done/tag/{tag}', 'MainController@tagdone');
+Route::get('/done/category/{category}', 'MainController@doneCategory');
+Route::get('/done/question/theme/{theme}', 'MainController@themedone');
 
 Route::get('/tag/{tag}', 'MainController@tag');
 Route::get('/tags', 'MainController@tagIndex');

@@ -35,7 +35,32 @@ class UserController extends Controller
             // something went wrong
             $request->session()->flash('notification', TRUE);
             $request->session()->flash('notification_type', 'danger');
-            $request->session()->flash('notification_msg', 'Uh oh, something went wrong while declining answer.');
+            $request->session()->flash('notification_msg', 'Uh oh, something went wrong while Approving user.');
+        }
+
+        return redirect()->to(url()->previous().'#'. $id);
+    }
+
+    public function approveadmin($id, Request $request){
+        DB::beginTransaction();
+
+        try {
+            DB::update("
+                UPDATE users
+                SET is_admin = 2
+                WHERE id = ?
+            ", [$id]);
+            DB::commit();
+            $request->session()->flash('notification', TRUE);
+            $request->session()->flash('notification_type', 'success');
+            $request->session()->flash('notification_msg', 'You have promote an user!');
+
+        } catch (\Exception $e) {
+            DB::rollback();
+            // something went wrong
+            $request->session()->flash('notification', TRUE);
+            $request->session()->flash('notification_type', 'danger');
+            $request->session()->flash('notification_msg', 'Uh oh, something went wrong while verify user.');
         }
 
         return redirect()->to(url()->previous().'#'. $id);
@@ -156,6 +181,7 @@ class UserController extends Controller
 	        $request->session()->put('username', $users[0]->username);
             $request->session()->put('email', $users[0]->email);
             $request->session()->put('is_approved', $users[0]->is_approved);
+            $request->session()->put('department_id', $users[0]->department_id);
 	        $request->session()->put('is_admin', $users[0]->is_admin);
 	        $request->session()->put('id', $users[0]->id);
 //

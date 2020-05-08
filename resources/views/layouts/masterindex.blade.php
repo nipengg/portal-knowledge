@@ -98,8 +98,10 @@
                                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                                            Question<b class="caret"></b></a>
                                         <ul class="dropdown-menu">
-                                            <li><a href="{{url('/')}}"><span class=""></span>Share Question</a></li>
+                                            <li><a href="{{url('/')}}"><span class=""></span>Request Question</a></li>
+                                            <li><a href="{{url('/done')}}"><span class=""></span>Answered Question</a></li>
                                             <li><a href="{{url('/question/tag/'.Session::get('id'))}}"><span class=""></span>Tag Question</a></li>
+                                            <li><a href="{{url('/question/tag/department/'.Session::get('department_id'))}}"><span class=""></span>Tag Department Request</a></li>
                                         </ul>
                                     </li>
                                     <li class="dropdown">
@@ -107,6 +109,7 @@
                                            Article<b class="caret"></b></a>
                                         <ul class="dropdown-menu">
                                             <li><a href="{{url('/articles')}}"><span class=""></span>Open Article</a></li>
+                                            <li><a href="{{url('/articles/department/'.Session::get('department_id'))}}"><span class=""></span>Tag Department Article</a></li>
                                             <li><a href="{{url('/articles/tag/'.Session::get('id'))}}"><span class=""></span>Tag Article</a></li>
                                         </ul>
                                     </li>
@@ -143,7 +146,7 @@
                                 </ul>
                             </li>
                             @endif
-                        @elseif(Session::get('is_admin') === 1)
+                        @elseif(Session::get('is_admin') === 1 || Session::get('is_admin') === 2 || Session::get('is_admin') === 3)
                         @if(Session::get('is_approved') === 'active')
                         <li class="dropdown">
                             {{-- <a href="#" class="dropdown-toggle" data-toggle="dropdown">
@@ -154,8 +157,10 @@
                                     <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                                        Question<b class="caret"></b></a>
                                     <ul class="dropdown-menu">
-                                        <li><a href="{{url('/')}}"><span class=""></span>Share Question</a></li>
+                                        <li><a href="{{url('/')}}"><span class=""></span>Request Question</a></li>
+                                        <li><a href="{{url('/done')}}"><span class=""></span>Answered Question</a></li>
                                         <li><a href="{{url('/question/tag/'.Session::get('id'))}}"><span class=""></span>Tag Question</a></li>
+                                        <li><a href="{{url('/question/tag/department/'.Session::get('department_id'))}}"><span class=""></span>Tag Department Request</a></li>
                                     </ul>
                                 </li>
                                 <li class="dropdown">
@@ -164,7 +169,13 @@
                                     <ul class="dropdown-menu">
                                         <li><a href="{{url('/articles')}}"><span class=""></span>Open Article</a></li>
                                         <li><a href="{{url('/articles/tag/'.Session::get('id'))}}"><span class=""></span>Tag Article</a></li>
+                                        <li><a href="{{url('/articles/department/'.Session::get('department_id'))}}"><span class=""></span>Tag Department Article</a></li>
                                         <li><a href="{{url('/articles/'.Session::get('id'))}}"><span class=""></span>My Article</a></li>
+                                        @if(Session::get('is_admin') === 3)
+                                        <li><a href="{{url('/articles/approve')}}"><span class=""></span>Approve Article</a></li>
+                                        @else
+
+                                        @endif
                                     </ul>
                                 </li>
                                 <li class="dropdown">
@@ -181,13 +192,14 @@
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                                Maintenance<b class="caret"></b></a>
                             <ul class="dropdown-menu">
-                                <li><a href="{{url('/categories')}}"><span class=""></span> Data Kategori</a></li>
+                                <li><a href="{{url('/categories')}}"><span class=""></span> Data Category</a></li>
                                 {{--<li><a href="#"><span class="fa fa-lock"></span> Change password</a></li>--}}
                                 <li><a href="{{url('/users')}}"><span class=""></span> Data User</a></li>
-                                <li><a href="{{url('/sumber')}}"><span class=""></span> Data Sumber</a></li>
+                                <li><a href="{{url('/sumber')}}"><span class=""></span> Data Source</a></li>
                                 <li><a href="{{url('/departments')}}"><span class=""></span> Data Department</a></li>
                                 <li><a href="{{url('/tags')}}"><span class=""></span> Data Tags</a></li>
-                                <li><a href="{{url('/themes')}}"><span class=""></span> Data Tema</a></li>
+                                <li><a href="{{url('/themes')}}"><span class=""></span> Data Theme</a></li>
+                                <li><a href="{{url('/topics')}}"><span class=""></span> Topic</a></li>
                             </ul>
                         </li>
                         <li class="dropdown">

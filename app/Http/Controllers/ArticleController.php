@@ -163,6 +163,191 @@ class ArticleController extends Controller
         return view('article.index', $data);
     }
 
+    public function approve(Request $request)
+    {   
+      if(Session::get('is_admin') === 0 || Session::has('username') === false) {
+        $request->session()->flash('notification', TRUE);
+        $request->session()->flash('notification_type', 'danger');
+        $request->session()->flash('notification_msg', 'You cant enter that area!');
+        return redirect()->to('/');
+      }
+        $data = [];
+        $data['filter'] = $request->filter ?: 'recent';
+        $filter = $data['filter'];
+        $data['page'] = $request->page ?: 1;
+        $page = $data['page'];
+        $data['limit'] = $request->limit ?: 10;
+
+        if($data['filter'] == 'recent'){
+            $articles = ArticleInisiative::orderBy('created_at', 'desc')
+                            ->where('is_active', 2)
+                            ->orderBy('id', 'desc');
+        } else {
+            $articles = ArticleInisiative::orderBy('created_at', 'desc')
+                ->where('is_active', 2)
+                ->orderBy('id', 'desc');
+        }
+        $articles = $articles->paginate(5);
+        $articles->setPath(url("/articles/?filter=$filter"));
+
+        $data['articles'] = $articles;
+
+        // $articles = DB::select("
+        // SELECT * FROM article_inisiatives
+        // WHERE is_active = 1 and security = 'sharing'
+        // ");
+        $department = DB::select("
+                    SELECT * FROM departments
+                    ORDER BY department_name
+            ");
+        $data['department'] = $department;
+
+        foreach($data['articles'] as $article){
+        $users = DB::select("
+                    SELECT 
+                      u.username
+                    FROM 
+                      users u, article_inisiatives a 
+                    WHERE
+                      a.id = ? AND
+                      a.user_id = u.id
+                ", [$article->id]);
+
+            $article->user = $users[0]->username;
+
+        $themes = DB::select("
+                    SELECT 
+                      t.theme
+                    FROM 
+                      themes t, article_inisiatives a 
+                    WHERE
+                      a.id = ? AND
+                      a.theme_id = t.id
+                ", [$article->id]);
+
+            $article->theme = $themes[0]->theme;
+
+       $sumbers = DB::select("
+                    SELECT 
+                      s.sumber_name 
+                    FROM 
+                      sumbers s, article_has_sumbers phs 
+                    WHERE
+                      phs.article_id = ? AND
+                      phs.sumber_id = s.id
+                ", [$article->id]);
+
+            $result_sumbers = [];
+            foreach($sumbers as $sumber){
+                array_push($result_sumbers, $sumber->sumber_name);
+            }
+            $article->sumbers = $result_sumbers;
+
+         $tags = DB::select("
+                    SELECT 
+                      t.tag 
+                    FROM 
+                      tags t, article_has_tags phs 
+                    WHERE
+                      phs.article_id = ? AND
+                      phs.tag_id = t.id
+                ", [$article->id]);
+
+            $result_tags = [];
+            foreach($tags as $tag){
+                array_push($result_tags, $tag->tag);
+            }
+            $article->tags = $result_tags;
+        }
+
+        return view('article.approve', $data);
+    }
+
+    public function approveview($id)
+    {   
+        $data = [];
+
+        $department = DB::select("
+                    SELECT * FROM departments
+                    ORDER BY department_name
+            ");
+        $data['department'] = $department;
+
+        $articles = DB::select("
+        SELECT * FROM article_inisiatives
+        ORDER BY id, title, content, user_id
+        ");
+
+        $data['articles'] = DB::select("
+            SELECT 
+              a.*, 
+              u.username as 'username', 
+              u.id as 'user_id'
+            FROM article_inisiatives a, users u
+            WHERE
+              a.id = ? AND 
+              a.user_id = u.id 
+            ", [$id])[0];
+
+        $data['themes'] = DB::select("
+            SELECT 
+              t.*
+            FROM article_inisiatives a, themes t
+            WHERE
+              a.id = ? AND 
+              a.theme_id = t.id 
+            ", [$id])[0];   
+
+        $tags = DB::select("
+                    SELECT 
+                      t.tag
+                    FROM 
+                      tags t, article_has_tags aht 
+                    WHERE
+                      aht.article_id = ? AND
+                      aht.tag_id = t.id
+                ", [$id]);
+
+        $result_tags = [];
+        foreach($tags as $tag){
+            array_push($result_tags, $tag->tag);
+        }
+        $data['article_tags'] = $result_tags;
+
+        $sumbers = DB::select("
+                    SELECT 
+                      s.sumber_name
+                    FROM 
+                      sumbers s, article_has_sumbers ahs
+                    WHERE
+                      ahs.article_id = ? AND
+                      ahs.sumber_id = s.id
+                ", [$id]);
+
+        $result_sumbers = [];
+        foreach($sumbers as $sumber){
+            array_push($result_sumbers, $sumber->sumber_name);
+        }
+        $data['article_sumbers'] = $result_sumbers;
+
+        $files = DB::select("
+                    SELECT 
+                      ahf.filename_article
+                    FROM 
+                      article_has_files ahf 
+                    WHERE
+                      ahf.article_id = ?
+                ", [$id]);
+
+        $result_files = [];
+        foreach($files as $file){
+            array_push($result_files, $file->filename_article);
+        }
+        $data['article_files'] = $result_files;
+
+        return view('article.approveview', $data);
+    }
+
     public function personal($id, Request $request)
     {   
         $data = [];
@@ -372,6 +557,118 @@ class ArticleController extends Controller
         return view('article.tag', $data);
     }
 
+    public function department($id ,Request $request)
+    {   
+      $data = [];
+      //
+      $department = DB::select("
+      SELECT * FROM departments
+      ORDER BY department_name
+      ");
+      $data['department'] = $department;
+      //
+      $data['filter'] = $request->filter ?: 'recent';
+      $filter = $data['filter'];
+      $data['page'] = $request->page ?: 1;
+      $page = $data['page'];
+      $data['limit'] = $request->limit ?: 10;
+
+      // $data['tag'] = $tag;
+      $data['id'] = $id;
+
+      // $tag_id = DB::select("
+      //         SELECT * FROM tags WHERE tag = ?
+      //     ", [$tag])[0]->id;
+
+      $articles = DB::select("
+              SELECT article_id FROM tagged_department_article WHERE department_id = ?
+          ", [$id]);
+
+      $article_ids = array();
+      foreach($articles as $article){
+          array_push($article_ids, $article->article_id);
+      }
+      if($data['filter'] == 'recent'){
+          $articles = ArticleInisiative::orderBy('created_at', 'desc')
+              ->where('security', 'konfidensial')
+              ->where('is_active', 1)
+              ->orderBy('id', 'desc');
+      } else if($data['filter'] == 'trending'){
+          
+      } else {
+          // fallback if user entered random gibberish in the url
+          $articles = ArticleInisiative::orderBy('created_at', 'desc')
+              ->orderBy('id', 'desc');;
+      }
+      $articles = $articles->whereIn('id', $article_ids)->paginate(5);
+
+      $articles->setPath(url("/$id/?filter=$filter"));
+      $data['articles'] = $articles;
+
+      // $articles = DB::select("
+      // SELECT * FROM article_inisiatives
+      // ");
+      
+      foreach($data['articles'] as $article){
+      $users = DB::select("
+                  SELECT 
+                    u.username
+                  FROM 
+                    users u, article_inisiatives a 
+                  WHERE
+                    a.id = ? AND
+                    a.user_id = u.id
+              ", [$article->id]);
+
+          $article->user = $users[0]->username;
+
+           $themes = DB::select("
+                  SELECT 
+                    t.theme
+                  FROM 
+                    themes t, article_inisiatives a
+                  WHERE
+                    a.id = ? AND
+                    a.theme_id = t.id
+              ", [$article->id]);
+
+          $article->theme = $themes[0]->theme;
+
+           $sumbers = DB::select("
+                  SELECT 
+                    s.sumber_name 
+                  FROM 
+                    sumbers s, article_has_sumbers phs 
+                  WHERE
+                    phs.article_id = ? AND
+                    phs.sumber_id = s.id
+              ", [$article->id]);
+
+          $result_sumbers = [];
+          foreach($sumbers as $sumber){
+              array_push($result_sumbers, $sumber->sumber_name);
+          }
+          $article->sumbers = $result_sumbers;
+
+       $tags = DB::select("
+                  SELECT 
+                    t.tag 
+                  FROM 
+                    tags t, article_has_tags phs 
+                  WHERE
+                    phs.article_id = ? AND
+                    phs.tag_id = t.id
+              ", [$article->id]);
+
+          $result_tags = [];
+          foreach($tags as $tag){
+              array_push($result_tags, $tag->tag);
+          }
+          $article->tags = $result_tags;
+      }
+        return view('article.tagd', $data);
+    }
+
     public function search(Request $request)
     {   
         $data = [];
@@ -382,18 +679,21 @@ class ArticleController extends Controller
         $data['limit'] = $request->limit ?: 10;
 
         $search = $request->search;
+        
         if($data['filter'] == 'recent'){
             $articles = ArticleInisiative::orderBy('created_at', 'desc')
                             ->where('title','like',"%".$search."%")
+                            ->where('security', 'sharing')
                             ->where('is_active', 1)
                             ->orderBy('id', 'desc');
         } else {
             $articles = ArticleInisiative::orderBy('created_at', 'desc')
                             ->where('title','like',"%".$search."%")
+                            ->where('security', 'sharing')
                             ->where('is_active', 1)
                             ->orderBy('id', 'desc');
         }
-        $articles = $articles->paginate($data['limit']);
+        $articles = $articles->paginate(5);
         $articles->setPath(url("/articles/?filter=$filter"));
 
         $data['articles'] = $articles;
@@ -933,7 +1233,6 @@ class ArticleController extends Controller
      */
     public function store(Request $request)
     {
-        try {
             $article = new ArticleInisiative();
             $article->title = Input::get('title');
             $article->content = Input::get('content');
@@ -941,7 +1240,11 @@ class ArticleController extends Controller
             $article->security = Input::get('security');
             $article->user_id = Session::get('id');
             $article->theme_id = Input::get('theme');
+            if(Session::get('is_admin') === 1){
+            $article->is_active = 2;
+            }else{
             $article->is_active = 1;
+            }
             $article->save();
 
             // associate the related sumber
@@ -983,7 +1286,27 @@ class ArticleController extends Controller
 
             $security = $request->input('security');
             $users = $request->input('users');
+            $departments = $request->input('departments');
             if($security === 'konfidensial'){
+              if($users === null){
+                foreach($departments as $department){
+                  DB::insert("
+                      INSERT INTO tagged_department_article
+                      (article_id, department_id)
+                      VALUES (?, ?)
+                  ", [$article_id, $department]);
+                }
+              }
+              else if($departments === null){
+                foreach($users as $user){
+                  DB::insert("
+                      INSERT INTO tagged_user_articles
+                      (article_id, user_id)
+                      VALUES (?, ?)
+                  ", [$article_id, $user]);
+                }
+              }
+              else{
                 foreach($users as $user){
                     DB::insert("
                         INSERT INTO tagged_user_articles
@@ -991,7 +1314,16 @@ class ArticleController extends Controller
                         VALUES (?, ?)
                     ", [$article_id, $user]);
                 }
+
+                foreach($departments as $department){
+                  DB::insert("
+                      INSERT INTO tagged_department_article
+                      (article_id, department_id)
+                      VALUES (?, ?)
+                  ", [$article_id, $department]);
+              }
             }
+          }
             else{
               
             }
@@ -1001,14 +1333,6 @@ class ArticleController extends Controller
             $request->session()->flash('notification', TRUE);
             $request->session()->flash('notification_type', 'success');
             $request->session()->flash('notification_msg', 'Your article is posted!');
-
-        } catch (\Exception $e) {
-            DB::rollback();
-            // something went wrong
-            $request->session()->flash('notification', TRUE);
-            $request->session()->flash('notification_type', 'danger');
-            $request->session()->flash('notification_msg', 'Uh oh, something went wrong while trying to take your answer.');
-        }
 
         return redirect()->to('articles');
     }
@@ -1086,6 +1410,32 @@ class ArticleController extends Controller
         }
 
         return redirect()->to('/articles');
+    }
+
+    public function approved($id, Request $request)
+    {
+        DB::beginTransaction();
+
+        try {  
+            DB::table('article_inisiatives')->where('id',$request->id)->update([
+                'is_active' => 1
+            ]);
+
+            DB::commit();
+            
+            $request->session()->flash('notification', TRUE);
+            $request->session()->flash('notification_type', 'success');
+            $request->session()->flash('notification_msg', 'Approved!');
+
+        } catch (\Exception $e) {
+            DB::rollback();
+            // something went wrong
+            $request->session()->flash('notification', TRUE);
+            $request->session()->flash('notification_type', 'danger');
+            $request->session()->flash('notification_msg', 'Uh oh, something went wrong.');
+        }
+
+        return redirect()->to('/articles/approve');
     }
 
     public function theme($theme, Request $request){

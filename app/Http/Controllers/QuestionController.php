@@ -22,7 +22,6 @@ class QuestionController extends Controller
         $data = [];
         $department = DB::select("
         SELECT * FROM departments
-        ORDER BY department_name
         ");
         $data['department'] = $department;
 
@@ -43,7 +42,7 @@ class QuestionController extends Controller
 
         $admins = DB::select("
                     SELECT * FROM users
-                    WHERE is_approved = 'active' AND is_admin = 1
+                    WHERE is_approved = 'active' AND is_admin = 1 OR is_admin = 2
             ");
         $data['admins'] = $admins;
 
@@ -324,13 +323,42 @@ class QuestionController extends Controller
            
             $security = $request->input('security');
             $users = $request->input('users');
+            $departments = $request->input('departments');
             if($security === 'konfidensial'){
-                foreach($users as $user){
-                    DB::insert("
-                        INSERT INTO tagged_user_questions
-                        (question_id, user_id)
-                        VALUES (?, ?)
-                    ", [$question_id, $user]);
+                if($users === null){
+                    foreach($departments as $department){
+                      DB::insert("
+                          INSERT INTO tagged_department_questions
+                          (question_id, department_id)
+                          VALUES (?, ?)
+                      ", [$question_id, $department]);
+                    }
+                  }
+                  else if($departments === null){
+                    foreach($users as $user){
+                      DB::insert("
+                          INSERT INTO tagged_user_questions
+                          (question_id, user_id)
+                          VALUES (?, ?)
+                      ", [$question_id, $user]);
+                    }
+                  }
+                  else{
+                    foreach($users as $user){
+                        DB::insert("
+                            INSERT INTO tagged_user_questions
+                            (question_id, user_id)
+                            VALUES (?, ?)
+                        ", [$question_id, $user]);
+                    }
+    
+                    foreach($departments as $department){
+                      DB::insert("
+                          INSERT INTO tagged_department_questions
+                          (question_id, department_id)
+                          VALUES (?, ?)
+                      ", [$question_id, $department]);
+                  }
                 }
             }
             else{
@@ -438,6 +466,10 @@ class QuestionController extends Controller
                      $data[] = $name;  
                  }
              }
+             if($data === ''){
+
+             }
+             else{
              foreach($data as $data){
                  DB::insert("
                      INSERT INTO question_has_files 
@@ -445,6 +477,7 @@ class QuestionController extends Controller
                      VALUES (?, ?)
                  ", [$data, $post]);
              }
+            }
         //      DB::delete("
         //      DELETE FROM question_has_files 
         //      WHERE 

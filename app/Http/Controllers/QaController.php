@@ -22,30 +22,32 @@ class QaController extends Controller
         $data['limit'] = $request->limit ?: 10;
 
         if($data['filter'] == 'recent'){
-            $qa = Qa::orderBy('created_at', 'desc')
-                            ->orderBy('id', 'desc');
+            $qas = Qa::orderBy('created_at', 'desc')
+                  ->where(function($query){
+                  $query->where('user_id', Session::get('id'))
+                        ->orWhere('user_request_id', Session::get('id'));
+                  })
+                  ->orderBy('id', 'desc');
         } else if($data['filter'] == 'trending'){
 
         } else {
-            $qa = Qa::orderBy('created_at', 'desc')
-                ->orderBy('id', 'desc');;
+            $qas = Qa::orderBy('created_at', 'desc')
+                ->where(function($query){
+                $query->where('user_id', Session::get('id'))
+                    ->orWhere('user_request_id', Session::get('id'));
+                })
+                ->orderBy('id', 'desc');
         }
-        $qa = $qa->paginate($data['limit']);
-        $qa->setPath(url("/?filter=$filter"));
+        $qas = $qas->paginate(5);
+        $qas->setPath(url("/?filter=$filter"));
 
-        $data['qa'] = $qa;
-
+        $data['qas'] = $qas;
 
         $department = DB::select("
                     SELECT * FROM departments
                     ORDER BY department_name
             ");
         $data['department'] = $department;
-
-        $qas = DB::select("
-        SELECT * FROM qas
-        ");
-        $data['qas'] = $qas;
 
         foreach($data['qas'] as $qa){
         $users = DB::select("

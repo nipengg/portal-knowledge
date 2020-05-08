@@ -33,7 +33,6 @@
             </div>
         @endif
         @foreach ($qas as $qa)
-        @if(Session::get('id') === $qa->user_id || Session::get('id') === $qa->user_request_id)
             <div class="card">
                 <div class="content">
                     <div class="row">
@@ -69,9 +68,6 @@
                 <h6>No article found</h6>
             </center>
         </div> --}}
-        @else
-
-        @endif
         @endforeach
 
 @endif

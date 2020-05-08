@@ -47,7 +47,7 @@
          @endif
         @endif
 
-        @if(Session::get('is_admin') === 1)
+        @if(Session::get('is_admin') === 1 || Session::get('is_admin') === 2 || Session::get('is_admin') === 3)
             @if(Session::get('is_approved') === 'active')
         <h5>Most popular tags:</h5>
             <span class="tags">

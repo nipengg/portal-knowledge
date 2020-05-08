@@ -133,7 +133,7 @@
             <a href="{{url("/tag/$tag")}}" class="tag"><span class="label label-info">#{{$tag}}</span></a>
         @endforeach
     </span>
-    @if(Session::get('is_admin') === 1)
+    @if(Session::get('is_admin') === 1 || Session::get('is_admin') === 2 || Session::get('is_admin') === 3)
         
     <span class="tags pull-right">                     &nbsp;
         @if($question->accepted_answer_id === 1 and $question->category_name === 'LEFO')
@@ -271,7 +271,7 @@
     <hr/>
 
     
-@if(Session::get('id') === $question->user_request_id and $question->category_name === 'LEFO' and $question->accepted_answer_id === 0)
+@if(Session::get('id') === $question->user_request_id and $question->accepted_answer_id === 0)
     <span class="tags pull-left">
         Estimate Time:                     &nbsp;
             @foreach ($category as $item)
@@ -511,13 +511,13 @@
                                     fa fa-3x fa-caret-up"></span></a>
                             <br/><span style="font-size: 1.7em">{{$answer->votes}}</span><br/><span class="hidden-xs">votes<br/></span><br/>
 
-                            @if(Session::get('is_admin') === 1 and Session::get('id') === $answer->user_id and ($question->accepted_answer_id === 0 || $question->accepted_answer_id === 2))
+                            @if((Session::get('is_admin') === 1 || Session::get('is_admin') === 2 || Session::get('is_admin') === 3) and Session::get('id') === $answer->user_id and ($question->accepted_answer_id === 0 || $question->accepted_answer_id === 2))
                             <span class="tags">
                                     <a href="{{url("/post/edit/$answer->id")}}" class="tag"><span class="label label-info"> Edit </span></a> 
                             </span>
                             @elseif(Session::get('is_admin') === 0)
-                                @if($answer->created_at != $answer->updated_at)
-                                <span class="hidden-xs label label-info">Edited by {{$answer->username}}</span>
+                                @if($answer->created_at != $answer->updated_at and ($question->accepted_answer_id === 0 || $question->accepted_answer_id === 2))
+                                <span class="hidden-xs label label-info">Edited <span data-time-format="time-ago" data-time-value="{{strtotime($answer->updated_at)}}"></span></span>
                                 <span class="visible-xs label label-warning" style="padding: .3em 0 .3em 0"><i class="fa fa-comments"></i></span>
                                 @else
 
@@ -544,9 +544,13 @@
                             @endforeach
                         </div>
                         <div class="col-sm-12 poster">
-                            File :
                              @foreach($answer['files'] as $file)
+                             @if($file === '')
+
+                             @else
+                             File :
                              <a href="{{URL::asset('/files/'.@$file)}}" download="{{ $file }}"><span>{{$file}}</span></a> &nbsp;
+                             @endif
                             @endforeach
                         </div>
                     </div>
@@ -630,7 +634,7 @@
 
     @if (Session::has('username'))
         @if ($question->accepted_answer_id === 0 || $question->accepted_answer_id === 2)
-            @if(Session::get('is_admin') === 1)
+            @if(Session::get('is_admin') === 1 || Session::get('is_admin') === 2 || Session::get('is_admin') === 3)
             <form action="{{url("/question/answer")}}" method="POST" enctype="multipart/form-data">
                     <input type="hidden" name="_token" value="{{ csrf_token() }}">
                     <input type="hidden" name="question_id" value="{{$question->id}}">

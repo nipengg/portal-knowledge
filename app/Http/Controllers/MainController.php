@@ -27,105 +27,54 @@ class MainController extends Controller
             ");
         $data['department'] = $department;
 
+        $topics = DB::select("
+                    SELECT * FROM topics
+            ");
+        $data['topics'] = $topics;
+
         if($data['filter'] == 'recent'){
             $questions = Question::orderBy('created_at', 'desc')
-                            ->orderBy('id', 'desc');
-            $answered = Question::where('accepted_answer_id', 1)
-                ->where('security', 'sharing')
+                ->where(function($query){
+                  $query->where('accepted_answer_id', 0)
+                        ->orWhere('accepted_answer_id', 2);
+                })
+                ->where(function($query){
+                  $query->where('user_id', Session::get('id'))
+                        ->orWhere('user_request_id', Session::get('id'));
+                })
                 ->orderBy('id', 'desc');
         } else if($data['filter'] == 'trending'){
             // implement some kind of algorithm to fetch based on trending questions
         } else if($data['filter'] == 'open'){
             $questions = Question::where('accepted_answer_id', 0)
+                ->where(function($query){
+                  $query->where('user_id', Session::get('id'))
+                        ->orWhere('user_request_id', Session::get('id'));
+                })
                 ->orderBy('created_at', 'desc');
-            $answered = Question::where('accepted_answer_id', 1)
-                ->where('security', 'sharing')
-                ->orderBy('id', 'desc');
-        } else if($data['filter'] == 'answered'){
-            $questions = Question::where('accepted_answer_id', 1)
+        } else if($data['filter'] == 'pending'){
+            $questions = Question::where('accepted_answer_id', 2)
+                ->where(function($query){
+                  $query->where('user_id', Session::get('id'))
+                        ->orWhere('user_request_id', Session::get('id'));
+                })
                 ->orderBy('created_at', 'desc');
-            $answered = Question::where('accepted_answer_id', 1)
-                ->where('security', 'sharing')
-                ->orderBy('id', 'desc');
         } else {
             $questions = Question::orderBy('created_at', 'desc')
-                ->orderBy('id', 'desc');
-            $answered = Question::where('accepted_answer_id', 1)
-                ->where('security', 'sharing')
+                ->where(function($query){
+                  $query->where('user_id', Session::get('id'))
+                        ->orWhere('user_request_id', Session::get('id'));
+                })
                 ->orderBy('id', 'desc');
         }
         $questions = $questions->paginate(5);
-        $answered = $answered->paginate(5);
         $questions->setPath(url("/?filter=$filter"));
 
-        $data['answered'] = $answered;
         $data['questions'] = $questions;
 
 //        $data['questions'] = Question::limit(5)->offset(0)->get();
 //        $data['questions'] = $questions->results;
 //        $data['questions_links'] = $questions->links();
-
-    foreach ($data['answered'] as $question){
-      $tags = DB::select("
-              SELECT 
-                t.tag 
-              FROM 
-                tags t, question_has_tags qht 
-              WHERE
-                qht.question_id = ? AND
-                qht.tag_id = t.id
-          ", [$question['id']]);
-
-      $result_tags = [];
-      foreach($tags as $tag){
-          array_push($result_tags, $tag->tag);
-      }
-      $question['tags'] = $result_tags;
-
-      $themes = DB::select("
-              SELECT 
-                t.theme
-              FROM 
-                themes t, questions q
-              WHERE
-                q.id = ? AND
-                q.theme_id = t.id
-          ", [$question->id]);
-
-      $question['theme'] = $themes[0]->theme;
-
-      $first_post = DB::select("
-              SELECT
-                p.votes, p.user_id, u.username, q.category_name
-              FROM
-                posts p, users u, questions q
-              WHERE
-                q.id = ? AND 
-                p.question_id = q.id AND 
-                u.id = p.user_id
-              ORDER BY
-                p.id ASC
-              LIMIT 1
-          ", [$question['id']]);
-
-      $question['votes'] = $first_post[0]->votes;
-      $question['asker'] = $first_post[0]->username;
-      $question['category'] = $first_post[0]->category_name;
-  
-
-      $answers_count = DB::select("
-              SELECT
-                p.*
-              FROM
-                posts p
-              WHERE
-                p.question_id = ?
-              ORDER BY
-                p.id ASC
-          ", [$question['id']]);
-
-      $question['answers'] = sizeof($answers_count)-1;
-    }
 
         foreach ($data['questions'] as $question){
             $tags = DB::select("
@@ -193,6 +142,125 @@ class MainController extends Controller
         return view('index', $data);
     }
 
+    public function done(Request $request){
+      $data = [];
+      $data['filter'] = $request->filter ?: 'recent';
+      $filter = $data['filter'];
+      $data['page'] = $request->page ?: 1;
+      $page = $data['page'];
+      $data['limit'] = $request->limit ?: 10;
+ 
+      $department = DB::select("
+                  SELECT * FROM departments
+                  where is_active = 1
+          ");
+      $data['department'] = $department;
+
+      if($data['filter'] == 'recent'){
+          $questions = Question::orderBy('created_at', 'desc')
+              ->where(function($query){
+                $query->where('accepted_answer_id', 1);
+              })
+              ->orderBy('id', 'desc');
+      } else if($data['filter'] == 'trending'){
+          // implement some kind of algorithm to fetch based on trending questions
+      } else if($data['filter'] == 'request'){
+          $questions = Question::where('accepted_answer_id', 1)
+              ->where(function($query){
+                $query->where('user_id', Session::get('id'))
+                      ->orWhere('user_request_id', Session::get('id'));
+              })
+              ->orderBy('created_at', 'desc');
+      } else if($data['filter'] == 'answered'){
+          $questions = Question::where('accepted_answer_id', 1)
+              ->where(function($query){
+                $query->where('user_id', Session::get('id'))
+                      ->orWhere('user_request_id', Session::get('id'));
+              })
+              ->orderBy('created_at', 'desc');
+      } else {
+          $questions = Question::orderBy('created_at', 'desc')
+              ->where(function($query){
+                $query->where('user_id', Session::get('id'))
+                      ->orWhere('user_request_id', Session::get('id'));
+              })
+              ->orderBy('id', 'desc');
+      }
+      $questions = $questions->paginate(5);
+      $questions->setPath(url("/done/?filter=$filter"));
+
+      $data['questions'] = $questions;
+
+//        $data['questions'] = Question::limit(5)->offset(0)->get();
+//        $data['questions'] = $questions->results;
+//        $data['questions_links'] = $questions->links();
+
+      foreach ($data['questions'] as $question){
+          $tags = DB::select("
+                  SELECT 
+                    t.tag 
+                  FROM 
+                    tags t, question_has_tags qht 
+                  WHERE
+                    qht.question_id = ? AND
+                    qht.tag_id = t.id
+              ", [$question['id']]);
+
+          $result_tags = [];
+          foreach($tags as $tag){
+              array_push($result_tags, $tag->tag);
+          }
+          $question['tags'] = $result_tags;
+
+          $themes = DB::select("
+                  SELECT 
+                    t.theme
+                  FROM 
+                    themes t, questions q
+                  WHERE
+                    q.id = ? AND
+                    q.theme_id = t.id
+              ", [$question->id]);
+
+          $question['theme'] = $themes[0]->theme;
+
+          $first_post = DB::select("
+                  SELECT
+                    p.votes, p.user_id, u.username, q.category_name
+                  FROM
+                    posts p, users u, questions q
+                  WHERE
+                    q.id = ? AND 
+                    p.question_id = q.id AND 
+                    u.id = p.user_id
+                  ORDER BY
+                    p.id ASC
+                  LIMIT 1
+              ", [$question['id']]);
+
+          $question['votes'] = $first_post[0]->votes;
+          $question['asker'] = $first_post[0]->username;
+          $question['category'] = $first_post[0]->category_name;
+          
+
+          $answers_count = DB::select("
+                  SELECT
+                    p.*
+                  FROM
+                    posts p
+                  WHERE
+                    p.question_id = ?
+                  ORDER BY
+                    p.id ASC
+              ", [$question['id']]);
+
+          $question['answers'] = sizeof($answers_count)-1;
+
+      }
+
+      return view('questions.done', $data);
+  }
+
 
     public function personal($id, Request $request){
       $data = [];
@@ -237,7 +305,7 @@ class MainController extends Controller
               ->orderBy('id', 'desc');
       }
 
-      $questions = $questions->whereIn('id', $question_ids)->paginate($data['limit']);
+      $questions = $questions->whereIn('id', $question_ids)->paginate(5);
       $questions->setPath(url("/?filter=$filter"));
 
       $data['questions'] = $questions;
@@ -312,6 +380,125 @@ class MainController extends Controller
       return view('questions.tag', $data);
   }
 
+
+  public function department($id, Request $request){
+    $data = [];
+    $data['filter'] = $request->filter ?: 'recent';
+    $filter = $data['filter'];
+    $data['page'] = $request->page ?: 1;
+    $page = $data['page'];
+    $data['limit'] = $request->limit ?: 10;
+
+    $department = DB::select("
+                SELECT * FROM departments
+                where is_active = 1
+        ");
+    $data['department'] = $department;
+
+    $data['id'] = $id;
+
+    $questions = DB::select("
+            SELECT question_id FROM tagged_department_questions WHERE department_id = ?
+    ",[$id]);
+
+    $question_ids = array();
+    foreach($questions as $question){
+        array_push($question_ids, $question->question_id);
+    }
+
+    if($data['filter'] == 'recent'){
+        $questions = Question::orderBy('created_at', 'desc')
+            ->where('accepted_answer_id', 1)
+            ->where('security', 'konfidensial')
+            ->orderBy('id', 'desc');
+    } else if($data['filter'] == 'trending'){
+        // implement some kind of algorithm to fetch based on trending questions
+    } else if($data['filter'] == 'open'){
+        $questions = Question::where('accepted_answer_id', 0)
+            ->orderBy('created_at', 'desc');
+    } else if($data['filter'] == 'answered'){
+        $questions = Question::where('accepted_answer_id', 1)
+            ->orderBy('created_at', 'desc');
+    } else {
+        $questions = Question::orderBy('created_at', 'desc')
+            ->orderBy('id', 'desc');
+    }
+
+    $questions = $questions->whereIn('id', $question_ids)->paginate(5);
+    $questions->setPath(url("/?filter=$filter"));
+
+    $data['questions'] = $questions;
+
+//        $data['questions'] = Question::limit(5)->offset(0)->get();
+//        $data['questions'] = $questions->results;
+//        $data['questions_links'] = $questions->links();
+
+    foreach ($data['questions'] as $question){
+        $tags = DB::select("
+                SELECT 
+                  t.tag 
+                FROM 
+                  tags t, question_has_tags qht 
+                WHERE
+                  qht.question_id = ? AND
+                  qht.tag_id = t.id
+            ", [$question['id']]);
+
+        $result_tags = [];
+        foreach($tags as $tag){
+            array_push($result_tags, $tag->tag);
+        }
+        $question['tags'] = $result_tags;
+
+        $themes = DB::select("
+                SELECT 
+                  t.theme
+                FROM 
+                  themes t, questions q
+                WHERE
+                  q.id = ? AND
+                  q.theme_id = t.id
+            ", [$question->id]);
+
+        $question['theme'] = $themes[0]->theme;
+
+        $first_post = DB::select("
+                SELECT
+                  p.votes, p.user_id, u.username, q.category_name
+                FROM
+                  posts p, users u, questions q
+                WHERE
+                  q.id = ? AND 
+                  p.question_id = q.id AND 
+                  u.id = p.user_id
+                ORDER BY
+                  p.id ASC
+                LIMIT 1
+            ", [$question['id']]);
+
+        $question['votes'] = $first_post[0]->votes;
+        $question['asker'] = $first_post[0]->username;
+        $question['category'] = $first_post[0]->category_name;
+        
+
+        $answers_count = DB::select("
+                SELECT
+                  p.*
+                FROM
+                  posts p
+                WHERE
+                  p.question_id = ?
+                ORDER BY
+                  p.id ASC
+            ", [$question['id']]);
+
+        $question['answers'] = sizeof($answers_count)-1;
+
+    }
+
+    return view('questions.tagd', $data);
+}
+
     public function search(Request $request){
       $data = [];
       $data['filter'] = $request->filter ?: 'recent';
@@ -330,106 +517,34 @@ class MainController extends Controller
 
       if($data['filter'] == 'recent'){
           $questions = Question::orderBy('created_at', 'desc')
+                          ->where(function($query){
+                             $query->where('accepted_answer_id', 0)
+                            ->orWhere('accepted_answer_id', 2);
+                          })
                           ->where('question_title','like',"%".$search."%")
                           ->orderBy('id', 'desc');
-          $answered = Question::where('accepted_answer_id', 1)
-                ->where('question_title','like',"%".$search."%")
-                ->orderBy('id', 'desc');
       } else if($data['filter'] == 'open'){
           $questions = Question::where('accepted_answer_id', 0)
               ->where('question_title','like',"%".$search."%")
               ->orderBy('created_at', 'desc');
-          $answered = Question::where('accepted_answer_id', 1)
-                ->where('question_title','like',"%".$search."%")
-                ->orderBy('id', 'desc');
       } else if($data['filter'] == 'answered'){
           $questions = Question::where('accepted_answer_id', 1)
               ->where('question_title','like',"%".$search."%")
               ->orderBy('created_at', 'desc');
-          $answered = Question::where('accepted_answer_id', 1)
-                ->where('question_title','like',"%".$search."%")
-                ->orderBy('id', 'desc');
       } else {
           // fallback if user entered random gibberish in the url
           $questions = Question::orderBy('created_at', 'desc')
               ->where('question_title','like',"%".$search."%")
               ->orderBy('id', 'desc');
-          $answered = Question::where('accepted_answer_id', 1)
-                ->where('question_title','like',"%".$search."%")
-                ->orderBy('id', 'desc');
       }
       $questions = $questions->paginate($data['limit']);
       $questions->setPath(url("/?filter=$filter"));
 
-      $data['answered'] = $answered;
       $data['questions'] = $questions;
 
 //        $data['questions'] = Question::limit(5)->offset(0)->get();
 //        $data['questions'] = $questions->results;
 //        $data['questions_links'] = $questions->links();
-
-foreach ($data['answered'] as $question){
-  $tags = DB::select("
-          SELECT 
-            t.tag 
-          FROM 
-            tags t, question_has_tags qht 
-          WHERE
-            qht.question_id = ? AND
-            qht.tag_id = t.id
-      ", [$question['id']]);
-
-  $result_tags = [];
-  foreach($tags as $tag){
-      array_push($result_tags, $tag->tag);
-  }
-  $question['tags'] = $result_tags;
-
-  $themes = DB::select("
-          SELECT 
-            t.theme
-          FROM 
-            themes t, questions q
-          WHERE
-            q.id = ? AND
-            q.theme_id = t.id
-      ", [$question->id]);
-
-  $question['theme'] = $themes[0]->theme;
-
-  $first_post = DB::select("
-          SELECT
-            p.votes, p.user_id, u.username, q.category_name
-          FROM
-            posts p, users u, questions q
-          WHERE
-            q.id = ? AND 
-            p.question_id = q.id AND 
-            u.id = p.user_id
-          ORDER BY
-            p.id ASC
-          LIMIT 1
-      ", [$question['id']]);
-
-  $question['votes'] = $first_post[0]->votes;
-  $question['asker'] = $first_post[0]->username;
-  $question['category'] = $first_post[0]->category_name;
-
-
-  $answers_count = DB::select("
-          SELECT
-            p.*
-          FROM
-            posts p
-          WHERE
-            p.question_id = ?
-          ORDER BY
-            p.id ASC
-      ", [$question['id']]);
-
-  $question['answers'] = sizeof($answers_count)-1;
-
-}
 
       foreach ($data['questions'] as $question){
           $tags = DB::select("
@@ -491,11 +606,121 @@ foreach ($data['answered'] as $question){
               ", [$question['id']]);
 
           $question['answers'] = sizeof($answers_count)-1;
-
       }
 
       return view('index', $data);
   }
+
+  public function searchdone(Request $request){
+    $data = [];
+    $data['filter'] = $request->filter ?: 'recent';
+    $filter = $data['filter'];
+    $data['page'] = $request->page ?: 1;
+    $page = $data['page'];
+    $data['limit'] = $request->limit ?: 10;
+
+    $department = DB::select("
+                SELECT * FROM departments
+                where is_active = 1
+        ");
+    $data['department'] = $department;
+
+    $search = $request->search;
+
+    if($data['filter'] == 'recent'){
+        $questions = Question::orderBy('created_at', 'desc')
+                        ->where(function($query){
+                           $query->where('accepted_answer_id', 1);
+                        })
+                        ->where('question_title','like',"%".$search."%")
+                        ->orderBy('id', 'desc');
+    } else if($data['filter'] == 'open'){
+        $questions = Question::where('accepted_answer_id', 0)
+            ->where('question_title','like',"%".$search."%")
+            ->orderBy('created_at', 'desc');
+    } else if($data['filter'] == 'answered'){
+        $questions = Question::where('accepted_answer_id', 1)
+            ->where('question_title','like',"%".$search."%")
+            ->orderBy('created_at', 'desc');
+    } else {
+        // fallback if user entered random gibberish in the url
+        $questions = Question::orderBy('created_at', 'desc')
+            ->where('question_title','like',"%".$search."%")
+            ->orderBy('id', 'desc');
+    }
+    $questions = $questions->paginate($data['limit']);
+    $questions->setPath(url("/?filter=$filter"));
+
+    $data['questions'] = $questions;
+
+//        $data['questions'] = Question::limit(5)->offset(0)->get();
+//        $data['questions'] = $questions->results;
+//        $data['questions_links'] = $questions->links();
+
+    foreach ($data['questions'] as $question){
+        $tags = DB::select("
+                SELECT 
+                  t.tag 
+                FROM 
+                  tags t, question_has_tags qht 
+                WHERE
+                  qht.question_id = ? AND
+                  qht.tag_id = t.id
+            ", [$question['id']]);
+
+        $result_tags = [];
+        foreach($tags as $tag){
+            array_push($result_tags, $tag->tag);
+        }
+        $question['tags'] = $result_tags;
+
+        $themes = DB::select("
+                SELECT 
+                  t.theme
+                FROM 
+                  themes t, questions q
+                WHERE
+                  q.id = ? AND
+                  q.theme_id = t.id
+            ", [$question->id]);
+
+        $question['theme'] = $themes[0]->theme;
+
+        $first_post = DB::select("
+                SELECT
+                  p.votes, p.user_id, u.username, q.category_name
+                FROM
+                  posts p, users u, questions q
+                WHERE
+                  q.id = ? AND 
+                  p.question_id = q.id AND 
+                  u.id = p.user_id
+                ORDER BY
+                  p.id ASC
+                LIMIT 1
+            ", [$question['id']]);
+
+        $question['votes'] = $first_post[0]->votes;
+        $question['asker'] = $first_post[0]->username;
+        $question['category'] = $first_post[0]->category_name;
+        
+
+        $answers_count = DB::select("
+                SELECT
+                  p.*
+                FROM
+                  posts p
+                WHERE
+                  p.question_id = ?
+                ORDER BY
+                  p.id ASC
+            ", [$question['id']]);
+
+        $question['answers'] = sizeof($answers_count)-1;
+    }
+
+    return view('questions.done', $data);
+}
 
     public function tagCategory($category ,Request $request){
       $data = [];
@@ -514,18 +739,30 @@ foreach ($data['answered'] as $question){
       if($data['filter'] == 'recent'){
           $questions = Question::orderBy('created_at', 'desc')
           ->where('category_name', $category)
-          ->orderBy('id', 'desc');
-          $answered = Question::orderBy('created_at', 'desc')
-          ->where('category_name', $category)
-          ->where('accepted_answer_id', 1)
+          ->where(function($query){
+            $query->where('accepted_answer_id', 0)
+                  ->orWhere('accepted_answer_id', 2);
+          })
+          ->where(function($query){
+            $query->where('user_id', Session::get('id'))
+                  ->orWhere('user_request_id', Session::get('id'));
+          })
           ->orderBy('id', 'desc');
       } else if($data['filter'] == 'open'){
           $questions = Question::where('accepted_answer_id', 0)
               ->where('category_name', $category)
+              ->where(function($query){
+                $query->where('user_id', Session::get('id'))
+                      ->orWhere('user_request_id', Session::get('id'));
+              })
               ->orderBy('created_at', 'desc');
       } else if($data['filter'] == 'answered'){
           $questions = Question::where('accepted_answer_id', 1)
               ->where('category_name', $category)
+              ->where(function($query){
+                $query->where('user_id', Session::get('id'))
+                      ->orWhere('user_request_id', Session::get('id'));
+              })
               ->orderBy('created_at', 'desc');
       } else {
           // fallback if user entered random gibberish in the url
@@ -534,11 +771,9 @@ foreach ($data['answered'] as $question){
               ->orderBy('id', 'desc');
       }
       $questions = $questions->paginate($data['limit']);
-      $answered = $answered->paginate($data['limit']);
       $questions->setPath(url("/$category/?filter=$filter"));
 
       $data['category'] = $category;
-      $data['answered'] = $answered;
       $data['questions'] = $questions;
 
 //        $data['questions'] = Question::limit(5)->offset(0)->get();
@@ -608,7 +843,67 @@ foreach ($data['answered'] as $question){
 
       }
 
-      foreach ($data['answered'] as $question){
+      return view('tags.category', $data);
+  }
+
+  public function doneCategory($category ,Request $request){
+    $data = [];
+    $data['filter'] = $request->filter ?: 'recent';
+    $filter = $data['filter'];
+    $data['page'] = $request->page ?: 1;
+    $page = $data['page'];
+    $data['limit'] = $request->limit ?: 10;
+
+    $department = DB::select("
+                SELECT * FROM departments
+                where is_active = 1
+        ");
+    $data['department'] = $department;
+
+    if($data['filter'] == 'recent'){
+        $questions = Question::orderBy('created_at', 'desc')
+        ->where('category_name', $category)
+        ->where(function($query){
+          $query->where('accepted_answer_id', 1);
+        })
+        ->where(function($query){
+          $query->where('user_id', Session::get('id'))
+                ->orWhere('user_request_id', Session::get('id'));
+        })
+        ->orderBy('id', 'desc');
+    } else if($data['filter'] == 'open'){
+        $questions = Question::where('accepted_answer_id', 0)
+            ->where('category_name', $category)
+            ->where(function($query){
+              $query->where('user_id', Session::get('id'))
+                    ->orWhere('user_request_id', Session::get('id'));
+            })
+            ->orderBy('created_at', 'desc');
+    } else if($data['filter'] == 'answered'){
+        $questions = Question::where('accepted_answer_id', 1)
+            ->where('category_name', $category)
+            ->where(function($query){
+              $query->where('user_id', Session::get('id'))
+                    ->orWhere('user_request_id', Session::get('id'));
+            })
+            ->orderBy('created_at', 'desc');
+    } else {
+        // fallback if user entered random gibberish in the url
+        $questions = Question::orderBy('created_at', 'desc')
+            ->where('category_name', $category)
+            ->orderBy('id', 'desc');
+    }
+    $questions = $questions->paginate($data['limit']);
+    $questions->setPath(url("/$category/?filter=$filter"));
+
+    $data['category'] = $category;
+    $data['questions'] = $questions;
+
+//        $data['questions'] = Question::limit(5)->offset(0)->get();
+//        $data['questions'] = $questions->results;
+//        $data['questions_links'] = $questions->links();
+
+    foreach ($data['questions'] as $question){
         $tags = DB::select("
                 SELECT 
                   t.tag 
@@ -671,8 +966,8 @@ foreach ($data['answered'] as $question){
 
     }
 
-      return view('tags.category', $data);
-  }
+    return view('done.category', $data);
+}
 
     public function question($question_id){
         $data = [];
@@ -916,53 +1211,40 @@ foreach ($data['answered'] as $question){
             array_push($question_ids, $question->question_id);
         }
 
-        $answered = DB::select("
-              SELECT question_id FROM question_has_tags WHERE tag_id = ?
-          ", [$tag_id]);
-
-          $answereds = array();
-          foreach($answered as $answered){
-              array_push($answereds, $answered->question_id);
-          }
-
         if($data['filter'] == 'recent'){
             $questions = Question::orderBy('created_at', 'desc')
-                ->where('security', 'sharing')
-                ->orderBy('id', 'desc');
-            $answered = Question::orderBy('created_at', 'desc')
-                ->where('accepted_answer_id', 1)
-                ->where('security', 'sharing')
-                ->orderBy('id', 'desc');
+            ->where(function($query){
+              $query->where('accepted_answer_id', 0)
+                    ->orWhere('accepted_answer_id', 2);
+            })
+                 ->where(function($query){
+                  $query->where('user_id', Session::get('id'))
+                        ->orWhere('user_request_id', Session::get('id'));
+                });
         } else if($data['filter'] == 'trending'){
             // implement some kind of algorithm to fetch based on trending questions
         } else if($data['filter'] == 'open'){
-            $questions = Question::where('accepted_answer_id', 0)
-                ->where('security', 'sharing')
-                ->orderBy('created_at', 'desc');
-            $answered = Question::orderBy('created_at', 'desc')
-                ->where('accepted_answer_id', 1)
-                ->where('security', 'sharing')
-                ->orderBy('id', 'desc');
+            $questions = Question::orderBy('created_at', 'desc')
+            ->where(function($query){
+              $query->where('user_id', Session::get('id'))
+                    ->orWhere('user_request_id', Session::get('id'));
+            });
         } else if($data['filter'] == 'answered'){
-            $questions = Question::where('accepted_answer_id', '<>', 0)
-                ->where('security', 'sharing')
-                ->orderBy('created_at', 'desc');
-            $answered = Question::orderBy('created_at', 'desc')
-                ->where('accepted_answer_id', 1)
-                ->where('security', 'sharing')
-                ->orderBy('id', 'desc');
+            $questions = Question::orderBy('created_at', 'desc')
+            ->where(function($query){
+              $query->where('user_id', Session::get('id'))
+                    ->orWhere('user_request_id', Session::get('id'));
+            });
         } else {
             // fallback if user entered random gibberish in the url
             $questions = Question::orderBy('created_at', 'desc')
                 ->where('security', 'sharing')
                 ->orderBy('id', 'desc');;
         }
-        $questions = $questions->whereIn('id', $question_ids)->paginate($data['limit']);
-        $answered = $answered->whereIn('id', $answereds)->paginate($data['limit']);
+        $questions = $questions->whereIn('id', $question_ids)->paginate(5);
 
         $questions->setPath(url("/$tag/?filter=$filter"));
 
-        $data['answered'] = $answered;
         $data['questions'] = $questions;
 
 //        $data['questions'] = Question::limit(5)->offset(0)->get();
@@ -1029,7 +1311,79 @@ foreach ($data['answered'] as $question){
             $question['answers'] = sizeof($answers_count)-1;
         }
 
-        foreach ($data['answered'] as $question){
+        return view('tags.view', $data);
+    }
+
+    public function tagdone($tag, Request $request){
+      $data = [];
+      //
+      $department = DB::select("
+      SELECT * FROM departments
+      ORDER BY department_name
+      ");
+      $data['department'] = $department;
+      //
+      $data['filter'] = $request->filter ?: 'recent';
+      $filter = $data['filter'];
+      $data['page'] = $request->page ?: 1;
+      $page = $data['page'];
+      $data['limit'] = $request->limit ?: 10;
+
+      $data['tag'] = $tag;
+
+      $tag_id = DB::select("
+              SELECT * FROM tags WHERE tag = ?
+          ", [$tag])[0]->id;
+
+      $questions = DB::select("
+              SELECT question_id FROM question_has_tags WHERE tag_id = ?
+          ", [$tag_id]);
+
+      $question_ids = array();
+      foreach($questions as $question){
+          array_push($question_ids, $question->question_id);
+      }
+
+      if($data['filter'] == 'recent'){
+          $questions = Question::orderBy('created_at', 'desc')
+          ->where(function($query){
+            $query->where('accepted_answer_id', 1);
+          })
+               ->where(function($query){
+                $query->where('user_id', Session::get('id'))
+                      ->orWhere('user_request_id', Session::get('id'));
+              });
+      } else if($data['filter'] == 'trending'){
+          // implement some kind of algorithm to fetch based on trending questions
+      } else if($data['filter'] == 'open'){
+          $questions = Question::orderBy('created_at', 'desc')
+          ->where(function($query){
+            $query->where('user_id', Session::get('id'))
+                  ->orWhere('user_request_id', Session::get('id'));
+          });
+      } else if($data['filter'] == 'answered'){
+          $questions = Question::orderBy('created_at', 'desc')
+          ->where(function($query){
+            $query->where('user_id', Session::get('id'))
+                  ->orWhere('user_request_id', Session::get('id'));
+          });
+      } else {
+          // fallback if user entered random gibberish in the url
+          $questions = Question::orderBy('created_at', 'desc')
+              ->where('security', 'sharing')
+              ->orderBy('id', 'desc');;
+      }
+      $questions = $questions->whereIn('id', $question_ids)->paginate(5);
+
+      $questions->setPath(url("/$tag/?filter=$filter"));
+
+      $data['questions'] = $questions;
+
+//        $data['questions'] = Question::limit(5)->offset(0)->get();
+//        $data['questions'] = $questions->results;
+//        $data['questions_links'] = $questions->links();
+
+      foreach ($data['questions'] as $question){
           $tags = DB::select("
                   SELECT 
                     t.tag
@@ -1087,11 +1441,10 @@ foreach ($data['answered'] as $question){
               ", [$question['id']]);
 
           $question['answers'] = sizeof($answers_count)-1;
-
       }
 
-        return view('tags.view', $data);
-    }
+      return view('done.tag', $data);
+  }
 
     public function theme($theme, Request $request){
       $data = [];
@@ -1123,40 +1476,43 @@ foreach ($data['answered'] as $question){
               array_push($question_ids, $question->id);
           }
 
-      $answered = DB::select("
-              SELECT * FROM questions WHERE accepted_answer_id = 1 AND theme_id = ?
-          ", [$theme_id]);
-
-          $answereds = array();
-          foreach($answered as $answered){
-              array_push($answereds, $answered->id);
-          }
-
           if($data['filter'] == 'recent'){
               $questions = Question::orderBy('created_at', 'desc')
-                  ->orderBy('id', 'desc');
-              $answered = Question::orderBy('created_at', 'desc')
+                  ->where(function($query){
+                  $query->where('accepted_answer_id', 0)
+                        ->orWhere('accepted_answer_id', 2);
+                  })
+                  ->where(function($query){
+                  $query->where('user_id', Session::get('id'))
+                        ->orWhere('user_request_id', Session::get('id'));
+                  })
                   ->orderBy('id', 'desc');
           } else if($data['filter'] == 'trending'){
               // implement some kind of algorithm to fetch based on trending questions
           } else if($data['filter'] == 'open'){
               $questions = Question::where('accepted_answer_id', 0)
+                  ->where(function($query){
+                  $query->where('user_id', Session::get('id'))
+                        ->orWhere('user_request_id', Session::get('id'));
+                  })
                   ->orderBy('created_at', 'desc');
           } else if($data['filter'] == 'answered'){
               $questions = Question::where('accepted_answer_id', '<>', 0)
+                  ->where(function($query){
+                  $query->where('user_id', Session::get('id'))
+                        ->orWhere('user_request_id', Session::get('id'));
+                   })
                   ->orderBy('created_at', 'desc');
           } else {
               // fallback if user entered random gibberish in the url
               $questions = Question::orderBy('created_at', 'desc')
                   ->orderBy('id', 'desc');;
           }
-          $questions = $questions->whereIn('id', $question_ids)->paginate($data['limit']);
-          $answered = $answered->whereIn('id', $answereds)->paginate($data['limit']);
+          $questions = $questions->whereIn('id', $question_ids)->paginate(5);
   
           $questions->setPath(url("/$theme/?filter=$filter"));
           
       $data['questions'] = $questions;
-      $data['answered'] = $answered;
 
 //        $data['questions'] = Question::limit(5)->offset(0)->get();
 //        $data['questions'] = $questions->results;
@@ -1223,7 +1579,81 @@ foreach ($data['answered'] as $question){
 
       }
 
-      foreach ($data['answered'] as $question){
+      return view('tags.themeQuestion', $data);
+  }
+
+  public function themedone($theme, Request $request){
+    $data = [];
+    //
+    $department = DB::select("
+    SELECT * FROM departments
+    ORDER BY department_name
+    ");
+    $data['department'] = $department;
+    //
+    $data['filter'] = $request->filter ?: 'recent';
+    $filter = $data['filter'];
+    $data['page'] = $request->page ?: 1;
+    $page = $data['page'];
+    $data['limit'] = $request->limit ?: 10;
+
+    $data['theme'] = $theme;
+
+    $theme_id = DB::select("
+            SELECT * FROM themes WHERE theme = ?
+        ", [$theme])[0]->id;
+
+    $questions = DB::select("
+            SELECT * FROM questions WHERE theme_id = ?
+        ", [$theme_id]);
+
+        $question_ids = array();
+        foreach($questions as $question){
+            array_push($question_ids, $question->id);
+        }
+
+        if($data['filter'] == 'recent'){
+            $questions = Question::orderBy('created_at', 'desc')
+                ->where(function($query){
+                  $query->where('accepted_answer_id', 1);
+                })
+                ->where(function($query){
+                $query->where('user_id', Session::get('id'))
+                      ->orWhere('user_request_id', Session::get('id'));
+                })
+                ->orderBy('id', 'desc');
+        } else if($data['filter'] == 'trending'){
+            // implement some kind of algorithm to fetch based on trending questions
+        } else if($data['filter'] == 'open'){
+            $questions = Question::where('accepted_answer_id', 0)
+                ->where(function($query){
+                $query->where('user_id', Session::get('id'))
+                      ->orWhere('user_request_id', Session::get('id'));
+                })
+                ->orderBy('created_at', 'desc');
+        } else if($data['filter'] == 'answered'){
+            $questions = Question::where('accepted_answer_id', '<>', 0)
+                ->where(function($query){
+                $query->where('user_id', Session::get('id'))
+                      ->orWhere('user_request_id', Session::get('id'));
+                 })
+                ->orderBy('created_at', 'desc');
+        } else {
+            // fallback if user entered random gibberish in the url
+            $questions = Question::orderBy('created_at', 'desc')
+                ->orderBy('id', 'desc');;
+        }
+        $questions = $questions->whereIn('id', $question_ids)->paginate(5);
+
+        $questions->setPath(url("/$theme/?filter=$filter"));
+        
+    $data['questions'] = $questions;
+
+//        $data['questions'] = Question::limit(5)->offset(0)->get();
+//        $data['questions'] = $questions->results;
+//        $data['questions_links'] = $questions->links();
+
+    foreach ($data['questions'] as $question){
         $tags = DB::select("
                 SELECT 
                   t.tag
@@ -1284,8 +1714,8 @@ foreach ($data['answered'] as $question){
 
     }
 
-      return view('tags.themeQuestion', $data);
-  }
+    return view('done.theme', $data);
+}
 
     public function tagIndex()
     {
@@ -1359,5 +1789,4 @@ foreach ($data['answered'] as $question){
     //         ", [$tag]);
     //     }
     // }
-
 }

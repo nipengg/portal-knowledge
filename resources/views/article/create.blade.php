@@ -46,7 +46,7 @@
         <div class="col-xs-12 col-sm-12 col-md-12">
             <div class="form-group label-floating">
                 <label class="control-label" for="security">Content</label>
-                <textarea class="form-control" style="height:150px" name="content"></textarea>
+                <textarea class="form-control" style="height:150px" id="content" name="content"></textarea>
             </div>
         </div>
         <div class="col-xs-12 col-sm-12 col-md-12">
@@ -65,7 +65,7 @@
             </div>
         </div>
 
-        <div class="col-xs-12 col-sm-12 col-md-12">
+        <div hidden class="col-xs-12 col-sm-12 col-md-12" id="user">
             <div class="form-group" id="users-div" style="margin : 0px">
                 <label class="control-label" for="user">Tag User</label>
                 <select class="tags-picker form-control" id="users" name="users[]" multiple>
@@ -80,7 +80,28 @@
                         placeholder: 'Qtc., other user',
                         searchFromStart: false,
                         displayNoResultsMessage: true,
-                        noResultsMessageText: '&nbsp; No tags found. Try typing different term.'
+                        noResultsMessageText: '&nbsp; No users found. Try typing different user.'
+                    });
+                </script>
+            </div>
+        </div>
+
+        <div hidden class="col-xs-12 col-sm-12 col-md-12" id="department">
+            <div class="form-group" id="users-div" style="margin : 0px">
+                <label class="control-label" for="user">Tag Department</label>
+                <select class="tags-picker form-control" id="departments" name="departments[]" multiple>
+                    @foreach($department as $department)
+                        <option value="{{$department->department_id}}">{{$department->department_name}}</option>
+                    @endforeach
+                </select>
+                <script>
+                    $(".tags-picker").tokenize2({
+                        tokensMaxItems: 10,
+                        dataSource: 'select',
+                        placeholder: 'Qtc., Departments',
+                        searchFromStart: false,
+                        displayNoResultsMessage: true,
+                        noResultsMessageText: '&nbsp; No Departments found. Try typing different department.'
                     });
                 </script>
             </div>
@@ -162,8 +183,23 @@
         </div>
     </div>
 </form>
+
 <script type="text/javascript">
     $(document).ready(function() {
+
+        $('#security').change(function () {
+            $(this).find("option:selected").each(function(){
+                var optionValue = $(this).attr("value");
+                if(optionValue === 'konfidensial'){
+                    $("#user").show();
+                    $("#department").show();
+                } 
+                else if(optionValue === 'sharing'){
+                    $("#user").hide();
+                    $("#department").hide();
+                }
+            });
+        });
 
       $(".btn-success").click(function(){ 
           var html = $(".clone").html();
@@ -175,4 +211,5 @@
       });
     });
 </script>
+
 @endsection

@@ -24,7 +24,7 @@ class CreateQuestionsTable extends Migration
             $table->datetime('estimated_time');
             $table->datetime('estimated_time_updated');
             $table->integer('theme_id');
-            $table->integer('post_rating')->default(0);
+            $table->float('post_rating')->default(0);
             $table->enum('security',['konfidensial', 'sharing'])->default('sharing');
 //            $table->integer('first_post_id')->unsigned();
             $table->integer('accepted_answer_id')->unsigned();

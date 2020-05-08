@@ -6,7 +6,7 @@
     <script>
         $(document).ready(function () {
             $("#filter-picker").on('change', function(){
-                window.location.href = "{{url('/?filter=')}}" + $("#filter-picker").val();
+                window.location.href = "{{url('/question/tag/'.$id.'?filter=')}}" + $("#filter-picker").val();
             });
         });
     </script>
@@ -21,8 +21,8 @@
         <select class="selectpicker" id="filter-picker" style="background: white !important;">
             <option value="recent"   {{$filter === "recent" ? 'selected' : ''}} >Recent</option>
             {{--<option value="trending" {{$filter === "trending" ? 'selected' : ''}} >Trending</option>--}}
-            <option value="open"     {{$filter === "open" ? 'selected' : ''}} >Open</option>
-            <option value="answered" {{$filter === "answered" ? 'selected' : ''}} >Answered</option>
+            {{-- <option value="open"     {{$filter === "open" ? 'selected' : ''}} >Open</option>
+            <option value="answered" {{$filter === "answered" ? 'selected' : ''}} >Answered</option> --}}
         </select>
         <!-- pagination controls -->
         <div class="pull-right">

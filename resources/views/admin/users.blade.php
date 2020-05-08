@@ -106,7 +106,7 @@
                                 <input type="hidden" name="page" value=""/>
                             </form>
                                 @endif
-                             @elseif($user->is_admin == 1)
+                             @elseif($user->is_admin == 1 || $user->is_admin == 2 || $user->is_admin == 3)
                                 @if($user->is_approved == 'active')
                                     <strong class="p-5">Admin</strong>
                                 @else
@@ -139,8 +139,12 @@
                                 @endif
                             @elseif($user->is_approved == 'sending' and $user->is_admin == 1)
                                 <span class="hidden-xs label label-warning">Sending</span>
-                            @else
+                            @elseif($user->is_approved == 'active' and $user->is_admin == 1)
                                     <strong class="p-5">Admin</strong>
+                            @elseif($user->is_approved == 'active' and $user->is_admin == 3)
+                                    <strong class="p-5">Leader Approved Admin</strong>
+                            @elseif($user->is_approved == 'active' and $user->is_admin == 2)
+                                    <strong class="p-5">Approved Admin</strong>
                             @endif
                         </td>
 
@@ -162,8 +166,14 @@
                                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" style="text-decoration:none">
                                     Properties<b class="caret"></b></a>
                                 <ul class="dropdown-menu">
+                                    @if(Session::get('is_admin') === 3 and ($user->is_admin === 1))
                                     <li><a href="{{url("/users/edit/".$user->id)}}"><span class=""></span> Edit</a></li>
                                     <li><a href="{{url("/users/delete/".$user->id)}}"><span class=""></span> Delete</a></li>
+                                    <li><a href="{{url("/users/approved/admin/".$user->id)}}"><span class=""></span> Verify</a></li>
+                                    @else
+                                    <li><a href="{{url("/users/edit/".$user->id)}}"><span class=""></span> Edit</a></li>
+                                    <li><a href="{{url("/users/delete/".$user->id)}}"><span class=""></span> Delete</a></li>
+                                    @endif
                                 </ul>
                             </li>
                         </td>

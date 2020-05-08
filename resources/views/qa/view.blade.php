@@ -258,17 +258,14 @@ li{
 
 				@endif
 			</div>&nbsp; <!-- end chat -->
-		</form>
-		@if($qa->accepted_qa_id === 0 and Session::get('is_admin') == 0)
+    </form>
+    
 		<form action="{{url("/qa/accept-answer")}}" method="POST">
 			<input type="hidden" name="_token" value="{{ csrf_token() }}">
 			<input type="hidden" name="qa_id" value="{{$qa->id}}">
 			<button type="submit" class="btn btn-primary btn-block">End Chat</button>&nbsp;
-		</form>
-		@else
-		
-    @endif
-
+    </form>
+    
 	<script> 
 		$(document).ready(function(){
 		setInterval(function(){

@@ -12,7 +12,7 @@
 </script>
 <span class="pull-left">
 @if((Session::get('is_approved') === 'active') or (Session::has('username') === false))
-<h3>All Article</h3>
+<h3>Approval Article</h3>
 <div>
     <select class="selectpicker" id="filter-picker" style="background: white !important;">
         <option value="recent"   {{$filter === "recent" ? 'selected' : ''}} >Recent</option>
@@ -25,7 +25,7 @@
 </span>
 <span class="pull-right">
     <div class="form-group label-floating">  
-        <form action="/articless/search" method="GET">
+        <form action="/articles/search" method="GET">
             <label class="control-label" for="search">Search</label>
             <input class="form-control" type="text" name="search" value="" required/>
             <input type="submit" class="btn-block btn btn-primary" value="Search">
@@ -49,7 +49,9 @@
                         <div class=" col-xs-10">
                             <br>
                             <div class="card-title" style="font-size: 1.4em;">
-                                <a href="{{url("/articles/view/$article->id")}}">{{$article->title}} </a>
+                                <a href="{{url("/articles/approve/view/$article->id")}}">{{$article->title}} </a>
+                                <span class="hidden-xs label label-danger">Not Approved</span>
+                                    <span class="visible-xs label label-warning" style="padding: .3em 0 .3em 0"><i class="fa fa-comments"></i></span>
                             </div>
                             <div class="card-description" style="font-size: .9em;">Wrote
                                 by <a href="">{{$article->user}}</a>

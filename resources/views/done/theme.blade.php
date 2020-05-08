@@ -6,16 +6,16 @@
     <script>
         $(document).ready(function () {
             $("#filter-picker").on('change', function(){
-                window.location.href = "{{url('/tag/question/theme/'.$theme.'?filter=')}}" + $("#filter-picker").val();
+                window.location.href = "{{url('/done/question/theme/'.$theme.'?filter=')}}" + $("#filter-picker").val();
             });
         });
     </script>
-    <h3>Questions tagged with: {{$theme}}</h3>
+    <h3>Answered Request with: {{$theme}}</h3>
     <div>
         <select class="selectpicker" id="filter-picker" style="background: white !important;">
             <option value="recent"   {{$filter === "recent" ? 'selected' : ''}} >Recent</option>
             {{--            <option value="trending" {{$filter === "trending" ? 'selected' : ''}} >Trending</option>--}}
-            <option value="open"     {{$filter === "open" ? 'selected' : ''}} >Open</option>
+            {{-- <option value="open"     {{$filter === "open" ? 'selected' : ''}} >Open</option> --}}
             <option value="answered" {{$filter === "answered" ? 'selected' : ''}} >Answered</option>
         </select>
         <!-- pagination controls -->
@@ -53,6 +53,9 @@
                             <div class="card-title" style="font-size: 1.4em;">
                                 <a href="{{url("/question/$question->id")}}">{{$question->question_title}}</a>
                             </div>
+                            <div class="card-description" style="font-size: 0.9em;">
+                                {{$question['summary_question']}}
+                            </div>
                             <div class="card-description" style="font-size: .9em;">Asked
                                 <span data-time-format="time-ago" data-time-value="{{strtotime($question->created_at)}}"></span>
                                 by {{$question->asker}}
@@ -60,14 +63,14 @@
                             </div>
                             <br/>
                             <span class="tags">
-                            @foreach($question->tags as $tag)<a href="{{url("/tag/$tag")}}" class="tag"><span class="label label-info">#{{$tag}}</span></a>&nbsp;
+                            @foreach($question->tags as $tag)<a href="{{url("/done/tag/$tag")}}" class="tag"><span class="label label-info">#{{$tag}}</span></a>&nbsp;
                                 @endforeach
                             </span>
                             <span class="tags">
-                                <a href="{{url("/question/category/".$question->category_name)}}" class="tag"><span class="label label-info">Category: {{$question->category_name}}</span></a>
+                                <a href="{{url("/done/category/".$question->category_name)}}" class="tag"><span class="label label-info">Category: {{$question->category_name}}</span></a>
                             </span>
                             <span class="tags">
-                                <a href="{{url('/tag/question/theme/'.$question->theme)}}" class="tag"><span class="label label-info">Theme: {{$question->theme}}</span></a>
+                                <a href="{{url('/done/question/theme/'.$question->theme)}}" class="tag"><span class="label label-info">Theme: {{$question->theme}}</span></a>
                             </span>
                         </div>
                         <div class="col-sm-2 hidden-xs" style="height:7em; display: flex; justify-content: center; flex-direction: column;">

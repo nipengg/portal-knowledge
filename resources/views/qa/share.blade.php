@@ -28,7 +28,7 @@
         @if (sizeof($qas) == 0)
             <div class="jumbotron">
                 <center>
-                    <h6>No Chat Send</h6>
+                    <h6>No Chat Shared</h6>
                 </center>
             </div>
         @endif
