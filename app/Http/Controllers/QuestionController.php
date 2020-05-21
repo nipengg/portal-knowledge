@@ -42,7 +42,7 @@ class QuestionController extends Controller
 
         $admins = DB::select("
                     SELECT * FROM users
-                    WHERE is_approved = 'active' AND is_admin = 1 OR is_admin = 2
+                    WHERE is_approved = 'active' AND is_admin = 1 OR is_admin = 2 OR is_admin = 3
             ");
         $data['admins'] = $admins;
 
@@ -466,7 +466,7 @@ class QuestionController extends Controller
                      $data[] = $name;  
                  }
              }
-             if($data === ''){
+             if($request->file('filename') === null){
 
              }
              else{
@@ -483,6 +483,20 @@ class QuestionController extends Controller
         //      WHERE 
         //      question_id = ? AND filename = ''
         //  ", [$question_id]);
+
+        if($request->input('refrence') === null){
+
+        }
+        else{
+            $refrences = $request->input('refrence');
+            foreach($refrences as $refrence){
+                DB::insert("
+                    INSERT INTO post_has_refrences 
+                    (post_id, refrence) 
+                    VALUES (?, ?)
+                ", [$post, $refrence]);
+          }
+        }
 
             DB::commit();
 
@@ -609,6 +623,7 @@ class QuestionController extends Controller
         try {
 
             $question = Question::find(Input::get('question_id'));
+            $question->closed_at = \Carbon\Carbon::now();
             $question->accepted_answer_id = 1;
             $question->save();
 
@@ -628,7 +643,7 @@ class QuestionController extends Controller
     }
 
     public function declineAnswer(Request $request){
-        // try {
+        try {
             $question = Question::find(Input::get('question_id'));
             $question->accepted_answer_id = 2;
             $question->save();
@@ -645,13 +660,115 @@ class QuestionController extends Controller
             $request->session()->flash('notification_type', 'success');
             $request->session()->flash('notification_msg', 'Success');
 
-        // } catch (\Exception $e) {
-        //     DB::rollback();
-        //     // something went wrong
-        //     $request->session()->flash('notification', TRUE);
-        //     $request->session()->flash('notification_type', 'danger');
-        //     $request->session()->flash('notification_msg', 'Uh oh, something went wrong while trying to accept an answer.');
-        // }
+        } catch (\Exception $e) {
+            DB::rollback();
+            // something went wrong
+            $request->session()->flash('notification', TRUE);
+            $request->session()->flash('notification_type', 'danger');
+            $request->session()->flash('notification_msg', 'Uh oh, something went wrong while trying to accept an answer.');
+        }
+
+        return redirect()->to(url()->previous(). '#' . Input::get('post_id'));
+    }
+
+    public function stopRequest(Request $request){
+        try {
+            $question = Question::find(Input::get('question_id'));
+            if(Session::get('is_admin') === 0){
+                $question->accepted_answer_id = 3;
+                $question->additional_information = $request->input('additional');
+            }
+            else{
+                $question->accepted_answer_id = 4;
+                $question->additional_information_admin = $request->input('additional');
+            }
+            $question->save();
+
+            $request->session()->flash('notification', TRUE);
+            $request->session()->flash('notification_type', 'success');
+            $request->session()->flash('notification_msg', 'Success');
+
+        } catch (\Exception $e) {
+            DB::rollback();
+            // something went wrong
+            $request->session()->flash('notification', TRUE);
+            $request->session()->flash('notification_type', 'danger');
+            $request->session()->flash('notification_msg', 'Uh oh, something went wrong while trying to accept an answer.');
+        }
+
+        return redirect()->to(url()->previous(). '#' . Input::get('post_id'));
+    }
+
+    public function cancelStop(Request $request){
+        try {
+            $question = Question::find(Input::get('question_id'));
+            if(Input::get('issues') === '-'){
+                $question->accepted_answer_id = 0;
+            }
+            else{
+                $question->accepted_answer_id = 2;
+            }
+            $question->save();
+
+            $request->session()->flash('notification', TRUE);
+            $request->session()->flash('notification_type', 'success');
+            $request->session()->flash('notification_msg', 'Success');
+
+        } catch (\Exception $e) {
+            DB::rollback();
+            // something went wrong
+            $request->session()->flash('notification', TRUE);
+            $request->session()->flash('notification_type', 'danger');
+            $request->session()->flash('notification_msg', 'Uh oh, something went wrong while trying to accept an answer.');
+        }
+
+        return redirect()->to(url()->previous(). '#' . Input::get('post_id'));
+    }
+
+    public function info(Request $request){
+        try {
+            $question = Question::find(Input::get('question_id'));
+            if(Session::get('is_admin') === 0){
+                $question->additional_information = $request->input('additional');
+            }
+            else{
+                $question->additional_information_admin = $request->input('additional');
+            }
+            $question->save();
+
+            $request->session()->flash('notification', TRUE);
+            $request->session()->flash('notification_type', 'success');
+            $request->session()->flash('notification_msg', 'Success');
+
+        } catch (\Exception $e) {
+            DB::rollback();
+            // something went wrong
+            $request->session()->flash('notification', TRUE);
+            $request->session()->flash('notification_type', 'danger');
+            $request->session()->flash('notification_msg', 'Uh oh, something went wrong while trying to accept an answer.');
+        }
+
+        return redirect()->to(url()->previous(). '#' . Input::get('post_id'));
+    }
+
+    public function approveStop(Request $request){
+        try {
+            $question = Question::find(Input::get('question_id'));
+            $question->additional_information = $request->input('additional');
+            $question->accepted_answer_id = 3;
+            $question->save();
+
+            $request->session()->flash('notification', TRUE);
+            $request->session()->flash('notification_type', 'success');
+            $request->session()->flash('notification_msg', 'Success');
+
+        } catch (\Exception $e) {
+            DB::rollback();
+            // something went wrong
+            $request->session()->flash('notification', TRUE);
+            $request->session()->flash('notification_type', 'danger');
+            $request->session()->flash('notification_msg', 'Uh oh, something went wrong while trying to accept an answer.');
+        }
 
         return redirect()->to(url()->previous(). '#' . Input::get('post_id'));
     }

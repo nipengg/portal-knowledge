@@ -32,14 +32,28 @@ Theme:<span class="tags">                     &nbsp;
         <a href="{{url("/tag/article/sumber/$sumber")}}" class="tag"><span class="label label-info">{{$sumber}}</span></a> &nbsp;
         @endforeach
 </span>
-
 <hr/>
-<span class="pull-left">
+@if(sizeOf($article_files) === 0)
+    <span class="label label-danger">No Files Attached</span> &nbsp;
+@else
+    <span class="pull-left">
     Files:                     &nbsp;
     @foreach($article_files as $file)
-    <a href="{{URL::asset('/files/'.@$file)}}" download="{{ $file }}" class="tag"><span class="label label-info">{{$file}}</span></a> 
+    <a href="{{URL::asset('/files/'.@$file)}}" download="{{ $file }}" class="tag"><span class="label label-info">{{$file}}</span></a> &nbsp;
     @endforeach
-</span>
+    </span>
+@endif
+
+@if(sizeOf($article_refrences) === 0)
+    <span class="label label-danger">No Refrence given</span> 
+@else
+    <span class="pull-left">
+    Refrences:          
+    @foreach($article_refrences as $refrence)
+        <span class="label label-info">{{$refrence}}</span> &nbsp;
+    @endforeach
+    </span>
+@endif
 <br/>
 <br/>
 <div class="col-xs-10 post">
@@ -51,5 +65,4 @@ Theme:<span class="tags">                     &nbsp;
 @stop
 @section('sidebar')
     @include('layouts.sidebar')
-    
 @stop

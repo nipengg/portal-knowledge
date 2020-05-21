@@ -159,24 +159,62 @@
     </div>
     </div>
 
+    <div class="col-xs-12 col-sm-12 col-md-12">
+        <div class="form-group" id="refrences-div">
+            <label class="control-label" for="refrence">Refrence</label>
+            <select class="tags-picker form-control" id="refrence" name="refrence[]" multiple>
+            </select>
+            <script>
+                $(".tags-picker").tokenize2({
+                    tokensMaxItems: 0,
+                    dataSource: 'select',
+                    placeholder: 'Add refrence here',
+                    tokensAllowCustom: true,
+                    searchFromStart: false,
+                    delimiter: [',', ' ', '\t', '\n', '\r\n'],
+                });
+            </script>
+        </div>
+    </div>
+        
      <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.js"></script>
      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
      <div class="col-xs-12 col-sm-12 col-md-12">
-     <div class="input-group control-group increment" >
+     <label class="control-label" for="file">File Refrences</label>
+     <div class="input-group control-group increment" id="increment1">
          <input type="file" name="file[]" id="file" class="form-control">
          <div class="input-group-btn"> 
-           <button class="btn btn-success" type="button"><i class="glyphicon glyphicon-plus"></i></button>
+           <button id="success1" class="btn btn-success" type="button"><i class="glyphicon glyphicon-plus"></i></button>
          </div>
        </div>
-       <div class="clone hide">
-         <div class="control-group input-group" style="margin-top:10px">
+       <div class="clone hide" id="clone1">
+         <div id="group1" class="control-group input-group" style="margin-top:10px">
            <input type="file" name="file[]" id="file" class="form-control">
            <div class="input-group-btn"> 
-             <button class="btn btn-danger" type="button"><i class="glyphicon glyphicon-remove"></i></button>
+             <button id="danger1" class="btn btn-danger" type="button"><i class="glyphicon glyphicon-remove"></i></button>
            </div>
          </div>
        </div>
     </div>
+    
+
+     {{-- <div class="col-xs-12 col-sm-12 col-md-12">
+     <label class="control-label" for="refrence">Refrences</label>
+     <div class="input-group control-group increment" id="increment2">
+         <input type="text" name="refrence[]" id="refrence" class="form-control">
+         <div class="input-group-btn"> 
+           <button id="success2" class="btn btn-success" type="button"><i class="glyphicon glyphicon-plus"></i></button>
+         </div>
+       </div>
+       <div class="clone hide" id="clone2">
+         <div id="group2" class="control-group input-group" style="margin-top:10px">
+           <input type="text" name="refrence[]" id="refrence" class="form-control">
+           <div class="input-group-btn"> 
+             <button id="danger2" class="btn btn-danger" type="button"><i class="glyphicon glyphicon-remove"></i></button>
+           </div>
+         </div>
+       </div>
+    </div> --}}
 
         <div class="col-xs-12 col-sm-12 col-md-12 text-center">
             <button type="submit" class="btn-block btn btn-primary">Submit</button>
@@ -201,14 +239,23 @@
             });
         });
 
-      $(".btn-success").click(function(){ 
-          var html = $(".clone").html();
-          $(".increment").after(html);
+      $("#success1").click(function(){ 
+          var html = $("#clone1").html();
+          $("#increment1").after(html);
       });
 
-      $("body").on("click",".btn-danger",function(){ 
-          $(this).parents(".control-group").remove();
+      $("body").on("click","#danger1",function(){ 
+          $(this).parents("#group1").remove();
       });
+
+    //   $("#success2").click(function(){ 
+    //       var html = $("#clone2").html();
+    //       $("#increment2").after(html);
+    //   });
+
+    //   $("body").on("click","#danger2",function(){ 
+    //       $(this).parents("#group2").remove();
+    //   });
     });
 </script>
 

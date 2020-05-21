@@ -5,10 +5,13 @@
     "license": "MIT",
     "type": "project",
     "require": {
-        "php": ">=5.6.4",
+        "php": ">=7.0.0",
         "barryvdh/laravel-ide-helper": "v2.3.2",
+        "phpoffice/phpspreadsheet": "^1.11",
         "laravel/framework": "5.4.*",
-        "laravel/tinker": "~1.0"
+        "laravel/tinker": "~1.0",
+        "barryvdh/laravel-dompdf": "^0.8.2",
+        "maatwebsite/excel": "~2.1.0"
     },
     "require-dev": {
         "fzaninotto/faker": "~1.4",

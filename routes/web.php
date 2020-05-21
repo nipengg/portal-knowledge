@@ -64,6 +64,10 @@ Route::post('/users/reject/{id}', 'UserController@reject');
 Route::post('/users/inactive/{id}', 'UserController@inactive');
 Route::get('/users/delete/{id}', 'UserController@destroy');
 
+Route::get('/report', 'ReportController@index');
+Route::get('/report/excel', 'ReportController@excel');
+Route::get('/report/pdf', 'ReportController@pdf');
+
 Route::get('topics', 'TopicController@index');
 Route::get('/topics/create','TopicController@create');
 Route::get('/topics/update/{id}','TopicController@update');
@@ -107,6 +111,11 @@ Route::get('/unvote/{post_id}', 'QuestionController@unvotePost');
 Route::post('/question/answer', 'QuestionController@answer');
 Route::post('/question/accept-answer', 'QuestionController@acceptAnswer');
 Route::post('/question/decline-answer', 'QuestionController@declineAnswer');
+Route::post('/question/approve/stop', 'QuestionController@approveStop');
+Route::post('/question/cancel/stop', 'QuestionController@cancelStop');
+Route::post('/question/stop', 'QuestionController@stopRequest');
+Route::post('/question/additional/information', 'QuestionController@info');
+
 
 Route::get('/themes', 'ThemeController@index');
 Route::post('/themes/active/{id}', 'ThemeController@active');

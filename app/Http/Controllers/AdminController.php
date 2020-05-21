@@ -20,7 +20,6 @@ class AdminController extends Controller
                 // tag exists already
                 continue;
             } else {
-                // tag doesn't exist yet, let's add it
                 DB::insert("INSERT INTO tags (tag) VALUES (?)", [$tag]);
             }
         }

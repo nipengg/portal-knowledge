@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreatePostIssuesTable extends Migration
+class CreateArticleHasRefrencesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,11 +13,10 @@ class CreatePostIssuesTable extends Migration
      */
     public function up()
     {
-        Schema::create('post_issues', function (Blueprint $table) {
-            $table->increments('issue_id');
-            $table->integer('question_id')->unsigned();
-            $table->string('issue');
-            $table->unique(['question_id','issue']);
+        Schema::create('article_has_refrences', function (Blueprint $table) {
+            $table->integer('article_id')->unsigned();
+            $table->string('refrence');
+            $table->unique(['article_id','refrence']);
             $table->timestamps();
         });
     }
@@ -29,6 +28,6 @@ class CreatePostIssuesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('post_issues');
+        Schema::dropIfExists('article_has_refrences');
     }
 }

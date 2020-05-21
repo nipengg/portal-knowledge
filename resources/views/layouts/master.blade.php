@@ -465,6 +465,115 @@
     </div>
     <!--  End Modal -->
 
+    <!--  Stop Modal -->
+    <div class="modal fade" id="stop" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-body">
+                <div class="col-sm-12">
+                    <div class="card card-raised card-nav-tabs">
+                        <div class="header header-primary">
+                            <!-- colors: "header-primary", "header-info", "header-success", "header-warning", "header-danger" -->
+                            <div class="nav-tabs-navigation">
+                                <center><i class="fa fa-edit"></i>Additional Information</center>
+                            </div>
+                        </div>
+                        <div class="content">
+                            <div class="tab-content">
+                                <form action="{{url("/question/stop")}}" method="POST">
+                                    {!! csrf_field() !!}
+                                    <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                                    <input type="hidden" name="question_id" value="{{$question->id}}">
+                                    <input type="hidden" name="post_id" value="{{$answer->id}}">
+                                    <div class="form-group label-floating">
+                                        <label class="control-label" for="issue">Additional Information</label>
+                                       <center> <textarea class="form-control" rows="7" name="additional" required></textarea> </center>
+                                        <div class="form-group">
+                                            <center><button class="btn btn-success">Send</button></center>
+                                        </div>
+                                    </div>
+                            </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--  End Modal -->
+
+    <!--  Info Modal -->
+    <div class="modal fade" id="info" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-body">
+                <div class="col-sm-12">
+                    <div class="card card-raised card-nav-tabs">
+                        <div class="header header-primary">
+                            <!-- colors: "header-primary", "header-info", "header-success", "header-warning", "header-danger" -->
+                            <div class="nav-tabs-navigation">
+                                <center><i class="fa fa-edit"></i>Additional Information.</center>
+                            </div>
+                        </div>
+                        <div class="content">
+                            <div class="tab-content">
+                                <form action="{{url("/question/additional/information")}}" method="POST">
+                                    {!! csrf_field() !!}
+                                    <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                                    <input type="hidden" name="question_id" value="{{$question->id}}">
+                                    <input type="hidden" name="post_id" value="{{$answer->id}}">
+                                    <div class="form-group label-floating">
+                                        <label class="control-label" for="issue">Additional Information</label>
+                                       <center> <textarea class="form-control" rows="7" name="additional" required></textarea> </center>
+                                        <div class="form-group">
+                                            <center><button class="btn btn-success">Send</button></center>
+                                        </div>
+                                    </div>
+                            </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--  End Modal -->
+
+    <!-- Approve Stop Modal -->
+    <div class="modal fade" id="stopa" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-body">
+                <div class="col-sm-12">
+                    <div class="card card-raised card-nav-tabs">
+                        <div class="header header-primary">
+                            <!-- colors: "header-primary", "header-info", "header-success", "header-warning", "header-danger" -->
+                            <div class="nav-tabs-navigation">
+                                <center><i class="fa fa-edit"></i>Additional Information</center>
+                            </div>
+                        </div>
+                        <div class="content">
+                            <div class="tab-content">
+                                <form action="{{url("/question/approve/stop")}}" method="POST">
+                                    {!! csrf_field() !!}
+                                    <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                                    <input type="hidden" name="question_id" value="{{$question->id}}">
+                                    <input type="hidden" name="post_id" value="{{$answer->id}}">
+                                    <input type="hidden" name="issues" value="{{$issues->issue}}">
+                                    <div class="form-group label-floating">
+                                        <label class="control-label" for="issue">Additional Information</label>
+                                       <center> <textarea class="form-control" rows="7" name="additional" required></textarea> </center>
+                                        <div class="form-group">
+                                            <center><button class="btn btn-success">Send</button></center>
+                                        </div>
+                                    </div>
+                            </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--  End Modal -->
+
     <!--  Date Modal -->
     <div class="modal fade" id="estimate" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
         <div class="modal-dialog">

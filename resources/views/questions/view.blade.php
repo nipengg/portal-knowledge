@@ -99,7 +99,27 @@
         -webkit-transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
         transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
         }
-
+        #file{
+            position: relative;
+            z-index: 2;
+            float: left;
+            width: 90%;
+            margin-bottom: 0;
+            border: 1;
+            background-image: #D2D2D2;
+            background-size: 0 2px, 100% 1px;
+            background-repeat: no-repeat;
+            background-position: center bottom, center calc(100% - 1px);
+            background-color: transparent;
+            transition: background 0s ease-out;
+            box-shadow: none;
+            border-radius: 0;
+            font-weight: 400;
+            height: 36px;
+            padding: 7px 0;
+            font-size: 14px;
+            line-height: 1.42857;
+        }
     </style>
 
 
@@ -202,6 +222,12 @@
                         <span class="visible-xs label label-warning" style="padding: .3em 0 .3em 0"><i class="fa fa-comments"></i></span>
                     @elseif($question->accepted_answer_id === 2)
                         <span class="hidden-xs label label-warning">Answer pending</span>
+                        <span class="visible-xs label label-warning" style="padding: .3em 0 .3em 0"><i class="fa fa-comments"></i></span>
+                    @elseif($question->accepted_answer_id === 3)
+                        <span class="hidden-xs label label-danger">Stop</span>
+                        <span class="visible-xs label label-warning" style="padding: .3em 0 .3em 0"><i class="fa fa-comments"></i></span>
+                    @elseif($question->accepted_answer_id === 4)
+                        <span class="hidden-xs label label-danger">Stop by admin</span>
                         <span class="visible-xs label label-warning" style="padding: .3em 0 .3em 0"><i class="fa fa-comments"></i></span>
                     @endif
                 </center>
@@ -481,7 +507,6 @@
 @endif
 </div>
 {{--  --}}
-
 @if($question->accepted_answer_id === 2)
     <span class="hidden-xs label label-warning">Cause: {!! nl2br($issues->issue) !!}</span>
     <br/>
@@ -553,6 +578,16 @@
                              @endif
                             @endforeach
                         </div>
+                        <div class="col-sm-12 poster">
+                            @foreach($answer['refrences'] as $refrence)
+                            @if($refrence === '')
+
+                            @else
+                            Reference :
+                            <span>{{$refrence}}</span>&nbsp;
+                            @endif
+                           @endforeach
+                       </div>
                     </div>
                 </div>
             </div>
@@ -622,6 +657,23 @@
             <button onclick="$('#issue').modal('show');" class="btn btn-warning btn-xs btn-round" style="padding: .5em"><span class="fa fa-cross"></span><span class="hidden-xs"> Not Yet</span></button>&nbsp;
             {{-- </form> --}}
         </span>
+        @elseif($question->accepted_answer_id === 4 and Session::get('id') === $question->user_id)
+        <span class="tags pull-left">                   
+            {{-- <form action="{{url("/question/approve/stop")}}" method="POST"> --}}
+                <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="question_id" value="{{$question->id}}">
+                <input type="hidden" name="issues" value="{{$issues->issue}}">
+                <button onclick="$('#stopa').modal('show');" class="btn btn-danger btn-xs btn-round" style="padding: .5em"><span class="hidden-xs"> Stop</span></button>&nbsp;
+            {{-- </form> --}}
+        </span>
+        <span class="tags pull-left">
+            <form action="{{url("/question/cancel/stop")}}" method="POST">
+                <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="question_id" value="{{$question->id}}">
+                <input type="hidden" name="issues" value="{{$issues->issue}}">
+                <button class="btn btn-success btn-xs btn-round" style="padding: .5em"><span class="hidden-xs"> Cancel</span></button>&nbsp;
+            </form>
+        </span>
         @else
 
         @endif
@@ -641,7 +693,7 @@
                 <div class="form-group">
                     <label class="control-label" for="first_post">Give your Response</label>
                     <textarea class="form-control" style="height:150px" name="content"></textarea>
-                    
+                </div>  
                     @if (Session::has('username'))
                     {{-- <div class="form-group label-floating">
                         <label class="control-label" for="sumber">Sumber</label>
@@ -669,32 +721,45 @@
                             });
                         </script>
                     </div>
+                    <div class="form-group" id="refrences-div">
+                        <label class="control-label" for="refrence">Reference</label>
+                        <select class="tags-picker form-control" id="refrence" name="refrence[]" multiple>
+                        </select>
+                        <script>
+                            $(".tags-picker").tokenize2({
+                                tokensMaxItems: 0,
+                                dataSource: 'select',
+                                placeholder: 'Add refrence here',
+                                tokensAllowCustom: true,
+                                searchFromStart: false,
+                                delimiter: [',', ' ', '\t', '\n', '\r\n'],
+                            });
+                        </script>
+                    </div>
                     @endif
-                </div>
             {{--  --}}
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-        <div class="input-group control-group increment">
-            <input type="file" name="filename[]" class="form-control">
+
+        {{-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script> --}}
+        <div class="" id="increment1">
+            <input type="file" name="filename[]" id="file" class="">
             <div class="input-group-btn"> 
-              <button class="btn btn-success" type="button"><i class="glyphicon glyphicon-plus"></i></button>
+              <button class="btn btn-success" id="success1" type="button"><i class="glyphicon glyphicon-plus"></i></button>
             </div>
           </div>
-          <div class="clone hide">
-            <div class="control-group input-group" style="margin-top:10px">
-              <input type="file" name="filename[]" class="form-control">
+          <div class="clone hide" id="clone1">
+            <div id="group1" class="" style="margin-top:10px">
+              <input type="file" name="filename[]" id="file" class="">
               <div class="input-group-btn"> 
-                <button class="btn btn-danger" type="button"><i class="glyphicon glyphicon-remove"></i></button>
+                <button id="danger1" class="btn btn-danger" type="button"><i class="glyphicon glyphicon-remove"></i></button>
               </div>
             </div>
           </div>
-            {{--  --}}
-
+        {{--  --}}
                 <div class="form-group right">
                     <button type="submit" class="btn-block btn btn-primary"><span class="fa fa-comments"></span> Answer</button>
                 </div>
             </form>
             @elseif(Session::get('id') === $answer->user_id)
-                @if($question->category_name === 'LEFO')
             <span class="tags pull-left">
                 Estimate Time:                     &nbsp;
                     @foreach ($category as $item)
@@ -707,8 +772,6 @@
                     Estimated Time Updated by
                      <a href="">{{$admins->username}}</a></span>
                 </div>
-            @else
-            @endif
             @else
 
             @endif
@@ -733,14 +796,14 @@
     <script type="text/javascript">
         $(document).ready(function() {
     
-          $(".btn-success").click(function(){ 
-              var html = $(".clone").html();
-              $(".increment").after(html);
-          });
-    
-          $("body").on("click",".btn-danger",function(){ 
-              $(this).parents(".control-group").remove();
-          });
+        $("#success1").click(function(){ 
+          var html = $("#clone1").html();
+          $("#increment1").after(html);
+        });
+
+        $("body").on("click","#danger1",function(){ 
+          $(this).parents("#group1").remove();
+        });
     
         });
     
@@ -750,6 +813,41 @@
 
 @section('sidebar')
     @extends('layouts.sidebar')
+    @if($question->accepted_answer_id === 0 || $question->accepted_answer_id === 2)
+    <li class="dropdown" style="list-style-type: none">
+        <a href="#" class="dropdown-toggle" data-toggle="dropdown" style="text-decoration: none">
+            Properties <b class="caret"></b></a>
+        <ul class="dropdown-menu">
+            <li><a onclick="$('#stop').modal('show');"> Stop</a></li>
+        </ul>
+    </li>
+    @elseif($question->accepted_answer_id === 1)
+    @if(Session::get('is_admin') === 0)
+        @if($question->additional_information === null)
+            <li class="dropdown" style="list-style-type: none">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" style="text-decoration: none">
+                    Properties <b class="caret"></b></a>
+                <ul class="dropdown-menu">
+                    <li><a onclick="$('#info').modal('show');"> Give Additional Information</a></li>
+                </ul>
+            </li>
+         @else
+            
+        @endif
+    @elseif(Session::get('is_admin') === 1 || Session::get('is_admin') === 2 || Session::get('is_admin') === 3)
+         @if($question->additional_information_admin === null)
+            <li class="dropdown" style="list-style-type: none">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" style="text-decoration: none">
+                    Properties <b class="caret"></b></a>
+                <ul class="dropdown-menu">
+                    <li><a onclick="$('#info').modal('show');"> Give Additional Information</a></li>
+                </ul>
+            </li>
+         @else
+            
+        @endif
+    @endif
+    @endif
     <hr/>
     <div class="row">
         <div class="col-sm-12"

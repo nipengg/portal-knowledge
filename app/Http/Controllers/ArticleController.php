@@ -1212,6 +1212,21 @@ class ArticleController extends Controller
         }
         $data['article_files'] = $result_files;
 
+        $refrences = DB::select("
+                    SELECT 
+                      ahr.refrence
+                    FROM 
+                      article_has_refrences ahr 
+                    WHERE
+                      ahr.article_id = ?
+                ", [$id]);
+
+        $result_refrences = [];
+        foreach($refrences as $refrence){
+            array_push($result_refrences, $refrence->refrence);
+        }
+        $data['article_refrences'] = $result_refrences;
+
         return view('article.view', $data);
     }
    
@@ -1276,13 +1291,32 @@ class ArticleController extends Controller
                         $data[] = $name;  
                     }
                 }
-              foreach($data as $data){
-                  DB::insert("
-                      INSERT INTO article_has_files 
-                      (filename_article, article_id) 
-                      VALUES (?, ?)
-                  ", [$data, $article_id]);
+                if($request->file('file') === null){
+
+                }
+                else{
+                foreach($data as $data){
+                    DB::insert("
+                        INSERT INTO article_has_files
+                        (filename_article, article_id) 
+                        VALUES (?, ?)
+                    ", [$data, $article_id]);
+                  }
+                }
+
+            if($request->input('refrence') === null){
+
+            }
+            else{
+                $refrences = $request->input('refrence');
+                foreach($refrences as $refrence){
+                    DB::insert("
+                        INSERT INTO article_has_refrences 
+                        (article_id, refrence) 
+                        VALUES (?, ?)
+                    ", [$article_id, $refrence]);
               }
+            }
 
             $security = $request->input('security');
             $users = $request->input('users');

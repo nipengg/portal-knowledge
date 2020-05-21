@@ -52,7 +52,23 @@ class MainController extends Controller
                         ->orWhere('user_request_id', Session::get('id'));
                 })
                 ->orderBy('created_at', 'desc');
-        } else if($data['filter'] == 'pending'){
+        }else if($data['filter'] == 'stop'){
+          $questions = Question::where('accepted_answer_id', 3)
+              ->where(function($query){
+                $query->where('user_id', Session::get('id'))
+                      ->orWhere('user_request_id', Session::get('id'));
+              })
+              ->orderBy('created_at', 'desc');
+        }
+        else if($data['filter'] == 'stoppending'){
+          $questions = Question::where('accepted_answer_id', 4)
+              ->where(function($query){
+                $query->where('user_id', Session::get('id'))
+                      ->orWhere('user_request_id', Session::get('id'));
+              })
+              ->orderBy('created_at', 'desc');
+        }
+         else if($data['filter'] == 'pending'){
             $questions = Question::where('accepted_answer_id', 2)
                 ->where(function($query){
                   $query->where('user_id', Session::get('id'))
@@ -1134,6 +1150,21 @@ class MainController extends Controller
                 array_push($result_files, $file->filename);
             }
             $answer['files'] = $result_files;
+
+        $refrences = DB::select("
+                    SELECT 
+                      phr.refrence 
+                    FROM 
+                    post_has_refrences phr
+                    WHERE
+                    phr.post_id = ?
+                ", [$answer['id']]);
+
+            $result_refrences = [];
+            foreach($refrences as $refrence){
+                array_push($result_refrences, $refrence->refrence);
+            }
+            $answer['refrences'] = $result_refrences;
           }
         
         foreach($data['answers'] as $answer){

@@ -25,6 +25,8 @@
             <option value="recent"   {{$filter === "recent" ? 'selected' : ''}} >Recent</option>
             <option value="open"     {{$filter === "open" ? 'selected' : ''}} >Open</option>
             <option value="pending" {{$filter === "pending" ? 'selected' : ''}} >Open pending</option>
+            <option value="stop" {{$filter === "stop" ? 'selected' : ''}} >Stopped</option>
+            <option value="stoppending" {{$filter === "stop" ? 'selected' : ''}} >Stop pending</option>
         </select>
         <!-- pagination controls -->
         <div class="pull-right">
@@ -64,6 +66,12 @@
                                     <span class="visible-xs label label-warning" style="padding: .3em 0 .3em 0"><i class="fa fa-comments"></i></span>
                                 @elseif($question->accepted_answer_id === 2)
                                     <span class="hidden-xs label label-warning">Answer pending</span>
+                                    <span class="visible-xs label label-warning" style="padding: .3em 0 .3em 0"><i class="fa fa-comments"></i></span>
+                                @elseif($question->accepted_answer_id === 3)
+                                    <span class="hidden-xs label label-danger">Stop</span>
+                                    <span class="visible-xs label label-warning" style="padding: .3em 0 .3em 0"><i class="fa fa-comments"></i></span>
+                                @elseif($question->accepted_answer_id === 4)
+                                    <span class="hidden-xs label label-danger">Stop by admin</span>
                                     <span class="visible-xs label label-warning" style="padding: .3em 0 .3em 0"><i class="fa fa-comments"></i></span>
                                 @endif
                             </center>
