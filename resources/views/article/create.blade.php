@@ -52,7 +52,7 @@
         <div class="col-xs-12 col-sm-12 col-md-12">
             <div class="form-group label-floating">
                 <label class="control-label" for="security">Summary of the article</label>
-                <input type="text" name="summary" class="form-control">
+                <textarea class="form-control" style="height:150px" name="summary"></textarea>
             </div>
         </div>
         <div class="col-xs-12 col-sm-12 col-md-12">
@@ -160,6 +160,13 @@
     </div>
 
     <div class="col-xs-12 col-sm-12 col-md-12">
+        <div class="form-group label-floating">
+            <label class="control-label" for="security">Reference</label>
+            <textarea class="form-control" style="height:150px" name="reference"></textarea>
+        </div>
+    </div>
+
+    {{-- <div class="col-xs-12 col-sm-12 col-md-12">
         <div class="form-group" id="refrences-div">
             <label class="control-label" for="refrence">Refrence</label>
             <select class="tags-picker form-control" id="refrence" name="refrence[]" multiple>
@@ -175,7 +182,7 @@
                 });
             </script>
         </div>
-    </div>
+    </div> --}}
         
      <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.js"></script>
      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">

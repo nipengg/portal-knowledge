@@ -41,13 +41,16 @@
             <label class="control-label" for="question_title">Title</label>
             <input class="form-control" type="text" name="question_title" value="" required/>
         </div>
+        @foreach($topics as $topic)
+        <input type="hidden" name="topic" value="{{$topic->topic}}">    
+        @endforeach
         <div class="form-group label-floating">
             <label class="control-label" for="first_post">Describe your request</label>
             <textarea class="form-control" rows="7" name="first_post" required></textarea>
         </div>
             <div class="form-group label-floating">
                 <label class="control-label" for="security">Summary of the request</label>
-                <input type="text" name="summary" class="form-control">
+                <textarea class="form-control" rows="7" name="summary" required></textarea>
             </div>      
         <div class="form-group label-floating">
             <label class="control-label" for="category">Category</label>

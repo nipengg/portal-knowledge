@@ -199,6 +199,16 @@
                                 <li><a href="{{url('/topics')}}"><span class=""></span> Topic</a></li>
                             </ul>
                         </li>
+
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                               Report<b class="caret"></b></a>
+                            <ul class="dropdown-menu">
+                                <li><a href="{{url('/report')}}"><span class=""></span>Data Report</a></li>
+                                <li><a href="{{url('/report/chart')}}"> Chart </a></li>
+                            </ul>
+                        </li>
+
                         <li class="dropdown">
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                                 <span class="fa fa-user-circle"></span>

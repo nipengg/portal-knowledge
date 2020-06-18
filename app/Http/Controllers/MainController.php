@@ -196,10 +196,7 @@ class MainController extends Controller
               ->orderBy('created_at', 'desc');
       } else {
           $questions = Question::orderBy('created_at', 'desc')
-              ->where(function($query){
-                $query->where('user_id', Session::get('id'))
-                      ->orWhere('user_request_id', Session::get('id'));
-              })
+              ->where('accepted_answer_id', 1)
               ->orderBy('id', 'desc');
       }
       $questions = $questions->paginate(5);
@@ -1151,20 +1148,20 @@ class MainController extends Controller
             }
             $answer['files'] = $result_files;
 
-        $refrences = DB::select("
-                    SELECT 
-                      phr.refrence 
-                    FROM 
-                    post_has_refrences phr
-                    WHERE
-                    phr.post_id = ?
-                ", [$answer['id']]);
+        // $refrences = DB::select("
+        //             SELECT 
+        //               phr.refrence 
+        //             FROM a
+        //             post_has_refrences phr
+        //             WHERE
+        //             phr.post_id = ?
+        //         ", [$answer['id']]);
 
-            $result_refrences = [];
-            foreach($refrences as $refrence){
-                array_push($result_refrences, $refrence->refrence);
-            }
-            $answer['refrences'] = $result_refrences;
+        //     $result_refrences = [];
+        //     foreach($refrences as $refrence){
+        //         array_push($result_refrences, $refrence->refrence);
+        //     }
+        //     $answer['refrences'] = $result_refrences;
           }
         
         foreach($data['answers'] as $answer){

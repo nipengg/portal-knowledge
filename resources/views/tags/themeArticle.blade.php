@@ -16,7 +16,6 @@
 <div>
     <select class="selectpicker" id="filter-picker" style="background: white !important;">
         <option value="recent"   {{$filter === "recent" ? 'selected' : ''}} >Recent</option>
-        <option value="trending" {{$filter === "trending" ? 'selected' : ''}} >Trending</option>
     </select>
     <!-- pagination controls -->
     {{-- <div class="pull-right">
@@ -42,6 +41,9 @@
                             </div>
                             <div class="card-description" style="font-size: .9em;">Wrote
                                 by <a href="">{{$article->user}}</a>
+                            </div>
+                            <div class="card-description" style="font-size: .9em;">
+                                {{$article->summary}}
                             </div>
                              <span class="tags">
                                  @foreach($article->sumbers as $sumber)<a href="{{url("/tag/article/sumber/$sumber")}}" class="tag"><span class="label label-info">{{$sumber}}</span></a>&nbsp;

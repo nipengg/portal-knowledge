@@ -17,7 +17,7 @@ use PDF;
 
 class ReportController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         if(Session::get('is_admin') === 0 || Session::has('username') === false) {
             $request->session()->flash('notification', TRUE);
@@ -98,13 +98,12 @@ class ReportController extends Controller
 
             $refrences = DB::select("
                     SELECT 
-                        phr.refrence
+                        p.refrence
                     FROM 
-                        post_has_refrences phr, questions q , posts p
+                        questions q , posts p
                     WHERE
                       q.id = ? AND
-                      p.question_id = q.id AND
-                      phr.post_id = p.id 
+                      p.question_id = q.id
                 ", [$question->id]);
 
             $result_refrences = [];
@@ -117,8 +116,8 @@ class ReportController extends Controller
                 $question->days = 'Not Finished';
             }
             else{
-            $to = \Carbon\Carbon::createFromFormat('Y-m-d H:s:i', $question->closed);
-            $from = \Carbon\Carbon::createFromFormat('Y-m-d H:s:i', $question->created);
+            $to = \Carbon\Carbon::parse($question->closed);
+            $from = \Carbon\Carbon::parse($question->created);
             $diff_in_days = $to->diffInDays($from);
             $question->days = $diff_in_days;
             }
@@ -208,13 +207,12 @@ class ReportController extends Controller
 
             $refrences = DB::select("
                     SELECT 
-                        phr.refrence
+                        p.refrence
                     FROM 
-                        post_has_refrences phr, questions q , posts p
+                        questions q , posts p
                     WHERE
                       q.id = ? AND
-                      p.question_id = q.id AND
-                      phr.post_id = p.id 
+                      p.question_id = q.id
                 ", [$question->id]);
 
             $result_refrences = [];
@@ -333,13 +331,12 @@ class ReportController extends Controller
 
             $refrences = DB::select("
                     SELECT 
-                        phr.refrence
+                        p.refrence
                     FROM 
-                        post_has_refrences phr, questions q , posts p
+                        questions q , posts p
                     WHERE
                       q.id = ? AND
-                      p.question_id = q.id AND
-                      phr.post_id = p.id 
+                      p.question_id = q.id
                 ", [$question->id]);
 
             $result_refrences = [];
@@ -392,5 +389,42 @@ class ReportController extends Controller
     });
 
     })->export('xlsx');
+    }
+
+    public function chart()
+    {
+        // $proces = Question::all();
+        // $done = [];
+
+        // foreach ($proces as $question) {
+        //     $done['proces'][] = Question::where('accepted_answer_id', 0)->count();
+        // }
+
+        // SELECT accepted_answer_id, COUNT(accepted_answer_id) as total FROM questions GROUP BY accepted_answer_id
+
+        $result = \DB::table('questions')
+                    ->select(DB::raw('count(*) as total, accepted_answer_id'))
+                    ->groupBy('accepted_answer_id')
+                    ->get();
+
+        return response()->json($result);
+    }
+
+    public function indexChart(Request $request){
+        if(Session::get('is_admin') === 0 || Session::has('username') === false) {
+            $request->session()->flash('notification', TRUE);
+            $request->session()->flash('notification_type', 'danger');
+            $request->session()->flash('notification_msg', 'You cant enter that area!');
+            return redirect()->to('/');
+        }
+
+        // $result = \DB::table('questions')
+        //             ->select(DB::raw('count(*) as total, accepted_answer_id'))
+        //             ->groupBy('accepted_answer_id')
+        //             ->get();
+
+        // dd($result);
+
+        return view('report/report');
     }
 }

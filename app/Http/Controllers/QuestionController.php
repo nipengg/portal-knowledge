@@ -40,6 +40,11 @@ class QuestionController extends Controller
             ");
         $data['themes'] = $themes;
 
+        $topics = DB::select("
+                    SELECT * FROM topics
+            ");
+        $data['topics'] = $topics;
+
         $admins = DB::select("
                     SELECT * FROM users
                     WHERE is_approved = 'active' AND is_admin = 1 OR is_admin = 2 OR is_admin = 3
@@ -287,11 +292,13 @@ class QuestionController extends Controller
             $question->question_title = $request->question_title;
             $question->user_id = Session::get('id');
             $question->user_request_id = $request->admin;
+            $question->topic = $request->topic;
             $question->category_name = $request->category_name;
             $question->theme_id = Input::get('theme');
             $question->estimated_time = $request->estimated;
             $question->estimated_time_updated = $request->estimated;
             $question->summary_question = $request->summary;
+            $question->is_give = 0;
             $question->accepted_answer_id = 0;
             $question->security = $request->security;
             $question->save();
@@ -304,6 +311,18 @@ class QuestionController extends Controller
             $post->user_id = Session::get('id');
             $post->question_id = $question_id;
             $post->save();
+
+            DB::update("
+                UPDATE reports
+                SET total = total + 1
+                WHERE id = 1
+            ");
+
+            DB::update("
+                UPDATE reports
+                SET total = total + 1
+                WHERE id = 4
+            ");
 
             $tags = $request->input('tags');
             $category = $request->input('category_name');
@@ -444,6 +463,13 @@ class QuestionController extends Controller
             $post->user_id = Session::get('id');
             $post->votes = 0;
             $post->question_id = Input::get('question_id');
+            if($request->input('refrence') === null){
+
+            }
+            else{
+                $refrences = $request->input('refrence');
+                $post->refrence = $refrences;
+            }
             $post->save();
 
              // associate the related tags
@@ -483,20 +509,6 @@ class QuestionController extends Controller
         //      WHERE 
         //      question_id = ? AND filename = ''
         //  ", [$question_id]);
-
-        if($request->input('refrence') === null){
-
-        }
-        else{
-            $refrences = $request->input('refrence');
-            foreach($refrences as $refrence){
-                DB::insert("
-                    INSERT INTO post_has_refrences 
-                    (post_id, refrence) 
-                    VALUES (?, ?)
-                ", [$post, $refrence]);
-          }
-        }
 
             DB::commit();
 
@@ -621,12 +633,37 @@ class QuestionController extends Controller
 
     public function acceptAnswer(Request $request){
         try {
+            $today = \Carbon\Carbon::now();
+            $estimated = $request->estimated_time;
+            $estimated_updated = $request->estimated_time_updated;
 
             $question = Question::find(Input::get('question_id'));
             $question->closed_at = \Carbon\Carbon::now();
             $question->accepted_answer_id = 1;
             $question->save();
 
+            if($today > $estimated_updated || $today > $estimated_updated){
+                DB::update("
+                    UPDATE reports
+                    SET total = total + 1
+                    WHERE id = 3
+                ");
+            }
+            else{
+                DB::update("
+                    UPDATE reports
+                    SET total = total + 1
+                    WHERE id = 2
+                ");
+            }
+
+            DB::update("
+                UPDATE reports
+                SET total = total - 1
+                WHERE id = 4
+            ");
+            
+            DB::commit();
             $request->session()->flash('notification', TRUE);
             $request->session()->flash('notification_type', 'success');
             $request->session()->flash('notification_msg', 'You have accepted an answer! Thank you for your input for the community!');
@@ -681,9 +718,27 @@ class QuestionController extends Controller
             else{
                 $question->accepted_answer_id = 4;
                 $question->additional_information_admin = $request->input('additional');
+                DB::update("
+                    UPDATE questions
+                    SET is_give = is_give + 1
+                    WHERE id = ?
+                ",[Input::get('question_id')]);
             }
             $question->save();
 
+            DB::update("
+                UPDATE reports
+                SET total = total - 1
+                WHERE id = 4
+            ");
+
+            DB::update("
+                UPDATE reports
+                SET total = total + 1
+                WHERE id = 5
+            ");
+
+            DB::commit();
             $request->session()->flash('notification', TRUE);
             $request->session()->flash('notification_type', 'success');
             $request->session()->flash('notification_msg', 'Success');
@@ -702,6 +757,7 @@ class QuestionController extends Controller
     public function cancelStop(Request $request){
         try {
             $question = Question::find(Input::get('question_id'));
+            $question->additional_information = $request->input('additional');
             if(Input::get('issues') === '-'){
                 $question->accepted_answer_id = 0;
             }
@@ -709,6 +765,20 @@ class QuestionController extends Controller
                 $question->accepted_answer_id = 2;
             }
             $question->save();
+
+            DB::update("
+                UPDATE reports
+                SET total = total + 1
+                WHERE id = 4
+            ");
+
+            DB::update("
+                UPDATE reports
+                SET total = total - 1
+                WHERE id = 5
+            ");
+
+            DB::commit();
 
             $request->session()->flash('notification', TRUE);
             $request->session()->flash('notification_type', 'success');
@@ -754,7 +824,6 @@ class QuestionController extends Controller
     public function approveStop(Request $request){
         try {
             $question = Question::find(Input::get('question_id'));
-            $question->additional_information = $request->input('additional');
             $question->accepted_answer_id = 3;
             $question->save();
 

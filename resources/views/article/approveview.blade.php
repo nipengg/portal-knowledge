@@ -6,9 +6,8 @@
     
 @if((Session::get('is_approved') === 'active') or (Session::has('username') === false))
 <h3>{{$articles->title}}  
-    <span class="tags"> 
-            <a href="{{url("/articles/approved/$articles->id")}}" class="tag"><span class="label label-success">Approve</span></a> 
-    </span>
+        <a href="{{url("/articles/approved/$articles->id")}}" class="btn btn-success"><span class="label label-success">Approve</span></a> 
+        <a href="{{url("/articles/unapproved/$articles->id")}}" class="btn btn-danger"><span class="label label-danger">Unapprove</span></a> 
 </h3>
 Tags:<span class="tags">                     &nbsp;
     @foreach($article_tags as $tag)

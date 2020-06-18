@@ -198,6 +198,16 @@
                                 <li><a href="{{url('/topics')}}"><span class=""></span> Topic</a></li>
                             </ul>
                         </li>
+
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                               Report<b class="caret"></b></a>
+                            <ul class="dropdown-menu">
+                                <li><a href="{{url('/report')}}"><span class=""></span>Data Report</a></li>
+                                <li><a href="{{url('/report/chart')}}"> Chart </a></li>
+                            </ul>
+                        </li>
+
                         <li class="dropdown">
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                                 <span class="fa fa-user-circle"></span>
@@ -551,7 +561,7 @@
                         </div>
                         <div class="content">
                             <div class="tab-content">
-                                <form action="{{url("/question/approve/stop")}}" method="POST">
+                                <form action="{{url("/question/cancel/stop")}}" method="POST">
                                     {!! csrf_field() !!}
                                     <input type="hidden" name="_token" value="{{ csrf_token() }}">
                                     <input type="hidden" name="question_id" value="{{$question->id}}">

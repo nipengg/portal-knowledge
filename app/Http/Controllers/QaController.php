@@ -192,7 +192,7 @@ class QaController extends Controller
 
         $admins = DB::select("
                     SELECT * FROM users
-                    WHERE is_approved = 'active' AND is_admin = 1
+                    WHERE is_approved = 'active' AND is_admin = 1 OR is_admin = 2 OR is_admin = 3
             ");
         $data['admins'] = $admins;
 

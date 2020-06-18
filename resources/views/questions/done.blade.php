@@ -24,7 +24,10 @@
         <select class="selectpicker" id="filter-picker" style="background: white !important;">
             <option value="recent"   {{$filter === "recent" ? 'selected' : ''}} >Recent</option>
             {{-- <option value="open"     {{$filter === "open" ? 'selected' : ''}} >Open</option> --}}
-        <option value="request" {{$filter === "request" ? 'selected' : ''}} >My Request</option>
+            <option value="request" {{$filter === "request" ? 'selected' : ''}} >My Request</option>
+            @if(Session::get('is_admin') === 3)
+            <option value="all"   {{$filter === "all" ? 'selected' : ''}} >All Request</option>
+            @endif
         </select>
         <!-- pagination controls -->
         <div class="pull-right">

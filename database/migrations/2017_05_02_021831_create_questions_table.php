@@ -17,7 +17,7 @@ class CreateQuestionsTable extends Migration
             $table->increments('id');
             $table->string('question_title');
             $table->string('summary_question');
-            $table->string('topic');
+            $table->string('topic')->nullable();
             $table->integer('user_id')->unsigned();
             $table->integer('user_request_id')->unsigned();
             $table->string('category_name');
@@ -27,7 +27,7 @@ class CreateQuestionsTable extends Migration
             $table->integer('theme_id');
             $table->float('post_rating')->default(0);
             $table->enum('security',['konfidensial', 'sharing'])->default('sharing');
-            $table->boolean('is_give')->nullable();
+            $table->integer('is_give')->nullable();
             $table->string('additional_information')->nullable();
             $table->string('additional_information_admin')->nullable();
 //          $table->integer('first_post_id')->unsigned();

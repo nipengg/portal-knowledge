@@ -43,6 +43,7 @@ Route::post('/qa/accept-answer', 'QaController@acceptAnswer');
 
 Route::resource('article','ArticleController');
 Route::get('/articles', 'ArticleController@articleform');
+Route::get('/articles/all', 'ArticleController@admin');
 Route::get('/articles/approve', 'ArticleController@approve');
 Route::get('/articles/approve/view/{id}', 'ArticleController@approveview');
 Route::get('/articles/{id}', 'ArticleController@personal');
@@ -53,6 +54,7 @@ Route::get('/articles/edit/{id}', 'ArticleController@articleEditForm');
 Route::post('/article/edit/id/{id}', 'ArticleController@articleEdit');
 Route::get('/articles/delete/{id}', 'ArticleController@delete');
 Route::get('/articles/approved/{id}', 'ArticleController@approved');
+Route::get('/articles/unapproved/{id}', 'ArticleController@unapproved');
 Route::get('/articless/search', 'ArticleController@search');
 
 Route::get('/users', 'UserController@userform');
@@ -65,6 +67,8 @@ Route::post('/users/inactive/{id}', 'UserController@inactive');
 Route::get('/users/delete/{id}', 'UserController@destroy');
 
 Route::get('/report', 'ReportController@index');
+Route::get('/report/chart', 'ReportController@indexChart');
+Route::get('/chart', 'ReportController@chart');
 Route::get('/report/excel', 'ReportController@excel');
 Route::get('/report/pdf', 'ReportController@pdf');
 

@@ -18,6 +18,7 @@ class CreateTrArticleInisiativeTable extends Migration
             $table->string('title');
             $table->text('content');
             $table->string('summary');
+            $table->text('refrence')->nullable();
             $table->enum('security',['konfidensial', 'sharing']);
             $table->integer('user_id');
             $table->integer('theme_id')->nullable();

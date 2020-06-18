@@ -6,7 +6,7 @@
 <script>
     $(document).ready(function () {
         $("#filter-picker").on('change', function(){
-            window.location.href = "{{url('/?filter=')}}" + $("#filter-picker").val();
+            window.location.href = "{{url('/articles/?filter=')}}" + $("#filter-picker").val();
         });
     });
 </script>
@@ -16,6 +16,9 @@
 <div>
     <select class="selectpicker" id="filter-picker" style="background: white !important;">
         <option value="recent"   {{$filter === "recent" ? 'selected' : ''}} >Recent</option>
+        @if(Session::get('is_admin') === 3)
+        <option value="all"   {{$filter === "all" ? 'selected' : ''}} >All Article</option>
+        @endif
     </select>
     <!-- pagination controls -->
     <div class="pull-right">

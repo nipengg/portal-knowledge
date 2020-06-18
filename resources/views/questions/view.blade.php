@@ -511,6 +511,10 @@
     <span class="hidden-xs label label-warning">Cause: {!! nl2br($issues->issue) !!}</span>
     <br/>
     <br/>
+@elseif($question->accepted_answer_id === 4)
+    <span class="hidden-xs label label-info">Stop Cause: {{$question->additional_information_admin}}</span>
+    <br/>
+    <br/>
 @endif
     <div class="pull-right">
         {{$answers->links()}}
@@ -579,14 +583,12 @@
                             @endforeach
                         </div>
                         <div class="col-sm-12 poster">
-                            @foreach($answer['refrences'] as $refrence)
-                            @if($refrence === '')
+                            @if($answer->refrence === '' || $answer->refrence === null)
 
                             @else
                             Reference :
-                            <span>{{$refrence}}</span>&nbsp;
+                            <span>{{$answer->refrence}}</span>&nbsp;
                             @endif
-                           @endforeach
                        </div>
                     </div>
                 </div>
@@ -646,6 +648,8 @@
                 <input type="hidden" name="_token" value="{{ csrf_token() }}">
                 <input type="hidden" name="question_id" value="{{$question->id}}">
                 <input type="hidden" name="post_id" value="{{$answer->id}}">
+                <input type="hidden" name="estimated_time" value="{{$question->estimated_time}}">
+                <input type="hidden" name="estimated_time_updated" value="{{$question->estimated_time_updated}}">
                 <button class="btn btn-success btn-xs btn-round" style="padding: .5em"><span class="hidden-xs"> Accept</span></button>&nbsp;
             </form>
         </span>
@@ -659,20 +663,20 @@
         </span>
         @elseif($question->accepted_answer_id === 4 and Session::get('id') === $question->user_id)
         <span class="tags pull-left">                   
-            {{-- <form action="{{url("/question/approve/stop")}}" method="POST"> --}}
+            <form action="{{url("/question/approve/stop")}}" method="POST">
                 <input type="hidden" name="_token" value="{{ csrf_token() }}">
                 <input type="hidden" name="question_id" value="{{$question->id}}">
                 <input type="hidden" name="issues" value="{{$issues->issue}}">
-                <button onclick="$('#stopa').modal('show');" class="btn btn-danger btn-xs btn-round" style="padding: .5em"><span class="hidden-xs"> Stop</span></button>&nbsp;
-            {{-- </form> --}}
+                <button class="btn btn-success btn-xs" style="padding: .5em"><span class="hidden-xs"> Accept</span></button>&nbsp;
+            </form>
         </span>
         <span class="tags pull-left">
-            <form action="{{url("/question/cancel/stop")}}" method="POST">
+            {{-- <form action="{{url("/question/cancel/stop")}}" method="POST"> --}}
                 <input type="hidden" name="_token" value="{{ csrf_token() }}">
                 <input type="hidden" name="question_id" value="{{$question->id}}">
                 <input type="hidden" name="issues" value="{{$issues->issue}}">
-                <button class="btn btn-success btn-xs btn-round" style="padding: .5em"><span class="hidden-xs"> Cancel</span></button>&nbsp;
-            </form>
+                <button onclick="$('#stopa').modal('show');" class="btn btn-danger btn-xs" style="padding: .5em"><span class="hidden-xs"> Decline</span></button>&nbsp;
+            {{-- </form> --}}
         </span>
         @else
 
@@ -721,7 +725,13 @@
                             });
                         </script>
                     </div>
-                    <div class="form-group" id="refrences-div">
+
+                    <div class="form-group">
+                        <label class="control-label" for="refrence">Reference</label>
+                        <textarea class="form-control" style="height:150px" name="refrence"></textarea>
+                    </div> 
+
+                    {{-- <div class="form-group" id="refrences-div">
                         <label class="control-label" for="refrence">Reference</label>
                         <select class="tags-picker form-control" id="refrence" name="refrence[]" multiple>
                         </select>
@@ -735,7 +745,7 @@
                                 delimiter: [',', ' ', '\t', '\n', '\r\n'],
                             });
                         </script>
-                    </div>
+                    </div> --}}
                     @endif
             {{--  --}}
 
@@ -814,35 +824,17 @@
 @section('sidebar')
     @extends('layouts.sidebar')
     @if($question->accepted_answer_id === 0 || $question->accepted_answer_id === 2)
-    <li class="dropdown" style="list-style-type: none">
-        <a href="#" class="dropdown-toggle" data-toggle="dropdown" style="text-decoration: none">
-            Properties <b class="caret"></b></a>
-        <ul class="dropdown-menu">
-            <li><a onclick="$('#stop').modal('show');"> Stop</a></li>
-        </ul>
-    </li>
+    <button class="btn btn-block btn-primary" style="background-color: #f44336" onclick="$('#stop').modal('show');">Stop Request</button>
     @elseif($question->accepted_answer_id === 1)
     @if(Session::get('is_admin') === 0)
         @if($question->additional_information === null)
-            <li class="dropdown" style="list-style-type: none">
-                <a href="#" class="dropdown-toggle" data-toggle="dropdown" style="text-decoration: none">
-                    Properties <b class="caret"></b></a>
-                <ul class="dropdown-menu">
-                    <li><a onclick="$('#info').modal('show');"> Give Additional Information</a></li>
-                </ul>
-            </li>
+        <button class="btn btn-block btn-primary" onclick="$('#info').modal('show');">Give Additional Information</button>
          @else
             
         @endif
     @elseif(Session::get('is_admin') === 1 || Session::get('is_admin') === 2 || Session::get('is_admin') === 3)
          @if($question->additional_information_admin === null)
-            <li class="dropdown" style="list-style-type: none">
-                <a href="#" class="dropdown-toggle" data-toggle="dropdown" style="text-decoration: none">
-                    Properties <b class="caret"></b></a>
-                <ul class="dropdown-menu">
-                    <li><a onclick="$('#info').modal('show');"> Give Additional Information</a></li>
-                </ul>
-            </li>
+         <button class="btn btn-block btn-primary" onclick="$('#info').modal('show');">Give Additional Information</button>
          @else
             
         @endif
@@ -875,6 +867,33 @@
         <div class="col-sm-8">{{$first_post->votes}}</div>
     </div>
     <hr/>
+    @if($question->accepted_answer_id === 1)
+    
+    <h4>Update</h4>
+        @if($question->additional_information !== null)
+        Footnote User  : {{$question->additional_information}}
+        @elseif($question->additional_information_admin !== null)
+        Footnote Admin : {{$question->additional_information_admin}}
+        @endif
+    <hr/>
+    @else
+
+    @endif
+    @if($question->is_give === 0)
+
+    @else
+    
+    <h4>Update</h4>
+    <div class="row hidden-xs">
+        <div class="col-sm-5" style="color:gray">Stopped</div>
+        <div class="col-sm-5">{{$question->is_give}} Time</div>
+    </div>
+    <div class="row hidden-xs">
+        <div class="col-sm-5" style="color:gray">Reason stop</div>
+        <div class="col-sm-5">{{$question->additional_information_admin}}</div>
+    </div>
+    <hr/>
+    @endif
     @parent
 @stop
 </html>

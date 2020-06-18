@@ -196,7 +196,7 @@ li{
 						@foreach ($messages as $item)
 						@if(Session::get('id') === $qa->user_id)
 							@if(Session::get('id') === $item->user_id)
-			
+                
 								<li class="clearfix">
 								  <div class="message-data align-right">
 									<span class="message-data-time" >{{$item->created_at}}</span> &nbsp; &nbsp;
@@ -266,11 +266,14 @@ li{
 			<button type="submit" class="btn btn-primary btn-block">End Chat</button>&nbsp;
     </form>
     
-	<script> 
+	<script>     
 		$(document).ready(function(){
 		setInterval(function(){
 			  $("#here").load(window.location.href + " #here" );
 		}, 1000);
+
+    var here = document.querySelector('.chat-history');
+    here.scrollTop = here.scrollHeight - here.clientHeight;
 		});
 		</script>
   </body>

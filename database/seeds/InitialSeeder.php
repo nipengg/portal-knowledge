@@ -20,6 +20,36 @@ class InitialSeeder extends Seeder
 //            'email' => 'admin' . '@gmail.com',
 //            'password' => sha1('admin123'),
 //        ]);
+        DB::table('reports')->insert([
+            'status' => 'total_project',
+            'total' => 0,
+            'created_at' => Carbon::now()->format('Y-m-d H:i:s'),
+            'updated_at' => Carbon::now()->format('Y-m-d H:i:s'),
+        ]);
+        DB::table('reports')->insert([
+            'status' => 'project_done_on_time',
+            'total' => 0,
+            'created_at' => Carbon::now()->format('Y-m-d H:i:s'),
+            'updated_at' => Carbon::now()->format('Y-m-d H:i:s'),
+        ]);
+        DB::table('reports')->insert([
+            'status' => 'project_done_over_time',
+            'total' => 0,
+            'created_at' => Carbon::now()->format('Y-m-d H:i:s'),
+            'updated_at' => Carbon::now()->format('Y-m-d H:i:s'),
+        ]);
+        DB::table('reports')->insert([
+            'status' => 'project_on_progress',
+            'total' => 0,
+            'created_at' => Carbon::now()->format('Y-m-d H:i:s'),
+            'updated_at' => Carbon::now()->format('Y-m-d H:i:s'),
+        ]);
+        DB::table('reports')->insert([
+            'status' => 'project_cancel',
+            'total' => 0,
+            'created_at' => Carbon::now()->format('Y-m-d H:i:s'),
+            'updated_at' => Carbon::now()->format('Y-m-d H:i:s'),
+        ]);
         DB::table('departments')->insert([
             'department_name' => 'RKA',
             'description' => 'R&D packaging and service',

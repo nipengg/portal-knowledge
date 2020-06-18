@@ -81,6 +81,10 @@ class ArticleController extends Controller
                             ->where('security', 'sharing')
                             ->where('is_active', 1)
                             ->orderBy('id', 'desc');
+        } elseif($data['filter'] == 'all'){
+          $articles = ArticleInisiative::orderBy('created_at', 'desc')
+                          ->where('is_active', 1)
+                          ->orderBy('id', 'desc');
         } else {
             $articles = ArticleInisiative::orderBy('created_at', 'desc')
                 ->where('security', 'sharing')
@@ -937,6 +941,8 @@ class ArticleController extends Controller
         }
         if($data['filter'] == 'recent'){
             $articles = ArticleInisiative::orderBy('created_at', 'desc')
+                ->where('is_active', 1)
+                ->where('security', 'sharing')
                 ->orderBy('id', 'desc');
         } else if($data['filter'] == 'trending'){
             
@@ -949,12 +955,6 @@ class ArticleController extends Controller
 
         $articles->setPath(url("/$tag/?filter=$filter"));
         $data['articles'] = $articles;
-
-        $articles = DB::select("
-        SELECT * FROM article_inisiatives
-
-        ");
-        
 
         foreach($data['articles'] as $article){
         $users = DB::select("
@@ -1047,8 +1047,11 @@ class ArticleController extends Controller
         foreach($articles as $article){
             array_push($article_ids, $article->article_id);
         }
+
         if($data['filter'] == 'recent'){
             $articles = ArticleInisiative::orderBy('created_at', 'desc')
+                ->where('is_active', 1)
+                ->where('security', 'sharing')
                 ->orderBy('id', 'desc');
         } else if($data['filter'] == 'trending'){
             
@@ -1057,16 +1060,10 @@ class ArticleController extends Controller
             $articles = ArticleInisiative::orderBy('created_at', 'desc')
                 ->orderBy('id', 'desc');;
         }
-        $articles = $articles->whereIn('id', $article_ids)->paginate($data['limit']);
+        $articles = $articles->whereIn('id', $article_ids)->paginate(5);
 
         $articles->setPath(url("/$sumber/?filter=$filter"));
         $data['articles'] = $articles;
-
-        $articles = DB::select("
-        SELECT * FROM article_inisiatives
-
-        ");
-        
 
         foreach($data['articles'] as $article){
         $users = DB::select("
@@ -1267,7 +1264,7 @@ class ArticleController extends Controller
             $article_id = DB::getPdo()->lastInsertId();
             foreach($sumbers as $sumber){
                 DB::insert("
-                    INSERT INTO article_has_sumbers 
+                    INSERT INTO article_has_sumbers
                     (sumber_id, article_id) 
                     VALUES (?, ?)
                 ", [$sumber, $article_id]);
@@ -1311,7 +1308,7 @@ class ArticleController extends Controller
                 $refrences = $request->input('refrence');
                 foreach($refrences as $refrence){
                     DB::insert("
-                        INSERT INTO article_has_refrences 
+                        INSERT INTO article_has_refrences
                         (article_id, refrence) 
                         VALUES (?, ?)
                     ", [$article_id, $refrence]);
@@ -1472,6 +1469,32 @@ class ArticleController extends Controller
         return redirect()->to('/articles/approve');
     }
 
+    public function unapproved($id, Request $request)
+    {
+        DB::beginTransaction();
+
+        try {  
+            DB::table('article_inisiatives')->where('id',$request->id)->update([
+                'is_active' => 0
+            ]);
+
+            DB::commit();
+            
+            $request->session()->flash('notification', TRUE);
+            $request->session()->flash('notification_type', 'danger');
+            $request->session()->flash('notification_msg', 'Unapproved!');
+
+        } catch (\Exception $e) {
+            DB::rollback();
+            // something went wrong
+            $request->session()->flash('notification', TRUE);
+            $request->session()->flash('notification_type', 'danger');
+            $request->session()->flash('notification_msg', 'Uh oh, something went wrong.');
+        }
+
+        return redirect()->to('/articles/approve');
+    }
+
     public function theme($theme, Request $request){
       $data = [];
       //
@@ -1497,13 +1520,9 @@ class ArticleController extends Controller
               SELECT * FROM article_inisiatives WHERE theme_id = ?
           ", [$theme_id]);
 
-      $data['articles'] = $articles;
-
-      $articles = DB::select("
-      SELECT * FROM article_inisiatives
-
-      ");
       
+
+      $data['articles'] = $articles;
 
       foreach($data['articles'] as $article){
       $users = DB::select("

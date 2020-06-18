@@ -16,7 +16,7 @@
             <option value="recent"   {{$filter === "recent" ? 'selected' : ''}} >Recent</option>
             {{--            <option value="trending" {{$filter === "trending" ? 'selected' : ''}} >Trending</option>--}}
             {{-- <option value="open"     {{$filter === "open" ? 'selected' : ''}} >Open</option> --}}
-            <option value="answered" {{$filter === "answered" ? 'selected' : ''}} >Answered</option>
+            {{-- <option value="answered" {{$filter === "answered" ? 'selected' : ''}} >Answered</option> --}}
         </select>
         <!-- pagination controls -->
         {{-- <div class="pull-right">

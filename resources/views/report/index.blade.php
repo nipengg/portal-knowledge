@@ -105,8 +105,8 @@
                         <th scope="col">Total Workouts Days</th>
                         <th scope="col">Status</th>
                         <th scope="col">Rating</th>
-                        <th scope="col">Refrence Data Upload</th>
-                        <th scope="col">Refrence Data</th>
+                        <th scope="col">Reference Data Upload</th>
+                        <th scope="col">Reference Data</th>
                         <th scope="col">Additional Information User</th>
                         <th scope="col">Additional Information Admin</th>
                 </tr>
@@ -121,7 +121,7 @@
                     <td style="vertical-align:middle" value="{{$question->id}}">{{$question->id}}</td> 
                     <td style="vertical-align:middle" value="{{$question->category_name}}">{{$question->category_name}}</td> 
                     <td style="vertical-align:middle" value="{{$question->question_title}}"><a href="{{url("/question/$question->id")}}">{{$question->question_title}}</a></td>
-                    <td style="vertical-align:middle" value="">-</td> 
+                    <td style="vertical-align:middle" value="">{{$question->topic}}</td> 
                     <td style="vertical-align:middle" value="{{$question->created_at}}">{{$question->created_at}}</td>
                     <td style="vertical-align:middle" value="{{$question->users}}"><a href="{{url('/profile/'.$question->user_id)}}">{{$question->users}}</td>
                     <td style="vertical-align:middle" value="{{$question->department}}">{{$question->department}}</td>
