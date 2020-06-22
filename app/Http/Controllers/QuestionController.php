@@ -639,7 +639,12 @@ class QuestionController extends Controller
 
             $question = Question::find(Input::get('question_id'));
             $question->closed_at = \Carbon\Carbon::now();
-            $question->accepted_answer_id = 1;
+            if($today > $estimated_updated || $today > $estimated_updated){
+                $question->accepted_answer_id = 5;
+            }
+            else{
+                $question->accepted_answer_id = 1;
+            }
             $question->save();
 
             if($today > $estimated_updated || $today > $estimated_updated){

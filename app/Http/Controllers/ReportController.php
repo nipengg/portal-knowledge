@@ -391,26 +391,48 @@ class ReportController extends Controller
     })->export('xlsx');
     }
 
-    public function chart()
+    public function chart($filter)
     {
-        // $proces = Question::all();
-        // $done = [];
-
-        // foreach ($proces as $question) {
-        //     $done['proces'][] = Question::where('accepted_answer_id', 0)->count();
-        // }
-
-        // SELECT accepted_answer_id, COUNT(accepted_answer_id) as total FROM questions GROUP BY accepted_answer_id
-
-        $result = \DB::table('questions')
-                    ->select(DB::raw('count(*) as total, accepted_answer_id'))
-                    ->groupBy('accepted_answer_id')
+        $result = DB::table('questions')
+                    ->select('accepted_answer_ids.id as status_id','accepted_answer_ids.status')
+		            ->addSelect(DB::raw('COUNT(accepted_answer_id) as total'))
+		            ->rightjoin('accepted_answer_ids', function($join) {
+			            $join->on('accepted_answer_ids.id', '=', 'questions.accepted_answer_id');
+                        })
+                    ->whereYEAR('questions.created_at', '=', $filter)
+                    ->groupBy('accepted_answer_ids.id')
                     ->get();
-
+                    
+        $total = DB::table('questions')
+		            ->addSelect(DB::raw('COUNT(id)'))
+		            ->from('questions')
+                    ->get();
+                    
         return response()->json($result);
     }
 
     public function indexChart(Request $request){
+        $data = [];
+        $data['filter'] = $request->filter ?: '2020';
+        $filter = $data['filter'];
+        $data['page'] = $request->page ?: 1;
+        $page = $data['page'];
+        $data['limit'] = $request->limit ?: 10;
+   
+        if($data['filter'] == '2020'){
+            $questions = Question::orderBy('created_at', 'desc')
+                            ->whereYear('created_at', 2020);
+        } else{
+            $questions = Question::orderBy('created_at', 'desc')
+                            ->whereYear('created_at', 2019);
+        }
+        $questions = $questions->paginate(5);
+        $questions->setPath(url("/report/chart/?filter=$filter"));
+        $data['filter'] = $filter;
+        $data['questions'] = $questions;
+        $selected_year = $request->input('year');
+        $data['chart_data'] = $this->chart($selected_year);
+
         if(Session::get('is_admin') === 0 || Session::has('username') === false) {
             $request->session()->flash('notification', TRUE);
             $request->session()->flash('notification_type', 'danger');
@@ -418,13 +440,6 @@ class ReportController extends Controller
             return redirect()->to('/');
         }
 
-        // $result = \DB::table('questions')
-        //             ->select(DB::raw('count(*) as total, accepted_answer_id'))
-        //             ->groupBy('accepted_answer_id')
-        //             ->get();
-
-        // dd($result);
-
-        return view('report/report');
+        return view('report/report', $data);
     }
 }

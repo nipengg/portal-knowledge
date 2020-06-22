@@ -175,23 +175,22 @@ class MainController extends Controller
       if($data['filter'] == 'recent'){
           $questions = Question::orderBy('created_at', 'desc')
               ->where(function($query){
-                $query->where('accepted_answer_id', 1);
+                $query->where('accepted_answer_id', 1)
+                      ->orwhere('accepted_answer_id', 5);
               })
               ->orderBy('id', 'desc');
       } else if($data['filter'] == 'trending'){
           // implement some kind of algorithm to fetch based on trending questions
       } else if($data['filter'] == 'request'){
-          $questions = Question::where('accepted_answer_id', 1)
+          $questions = Question::orderBy('created_at', 'desc')
               ->where(function($query){
                 $query->where('user_id', Session::get('id'))
-                      ->orWhere('user_request_id', Session::get('id'));
+                      ->orWhere('user_request_id', Session::get('id'))
+                      ->orwhere('accepted_answer_id', 5);
               })
-              ->orderBy('created_at', 'desc');
-      } else if($data['filter'] == 'answered'){
-          $questions = Question::where('accepted_answer_id', 1)
               ->where(function($query){
-                $query->where('user_id', Session::get('id'))
-                      ->orWhere('user_request_id', Session::get('id'));
+                $query->where('accepted_answer_id', 1)
+                      ->orwhere('accepted_answer_id', 5); 
               })
               ->orderBy('created_at', 'desc');
       } else {
@@ -643,18 +642,11 @@ class MainController extends Controller
     if($data['filter'] == 'recent'){
         $questions = Question::orderBy('created_at', 'desc')
                         ->where(function($query){
-                           $query->where('accepted_answer_id', 1);
+                           $query->where('accepted_answer_id', 1)
+                                 ->orwhere('accepted_answer_id', 5);
                         })
                         ->where('question_title','like',"%".$search."%")
                         ->orderBy('id', 'desc');
-    } else if($data['filter'] == 'open'){
-        $questions = Question::where('accepted_answer_id', 0)
-            ->where('question_title','like',"%".$search."%")
-            ->orderBy('created_at', 'desc');
-    } else if($data['filter'] == 'answered'){
-        $questions = Question::where('accepted_answer_id', 1)
-            ->where('question_title','like',"%".$search."%")
-            ->orderBy('created_at', 'desc');
     } else {
         // fallback if user entered random gibberish in the url
         $questions = Question::orderBy('created_at', 'desc')
@@ -877,7 +869,8 @@ class MainController extends Controller
         $questions = Question::orderBy('created_at', 'desc')
         ->where('category_name', $category)
         ->where(function($query){
-          $query->where('accepted_answer_id', 1);
+          $query->where('accepted_answer_id', 1)
+                ->orwhere('accepted_answer_id', 5);
         })
         ->where(function($query){
           $query->where('user_id', Session::get('id'))
@@ -1375,7 +1368,8 @@ class MainController extends Controller
       if($data['filter'] == 'recent'){
           $questions = Question::orderBy('created_at', 'desc')
           ->where(function($query){
-            $query->where('accepted_answer_id', 1);
+            $query->where('accepted_answer_id', 1)
+                  ->orwhere('accepted_answer_id', 5);
           })
                ->where(function($query){
                 $query->where('user_id', Session::get('id'))
@@ -1643,7 +1637,8 @@ class MainController extends Controller
         if($data['filter'] == 'recent'){
             $questions = Question::orderBy('created_at', 'desc')
                 ->where(function($query){
-                  $query->where('accepted_answer_id', 1);
+                  $query->where('accepted_answer_id', 1)
+                        ->orwhere('accepted_answer_id', 5);
                 })
                 ->where(function($query){
                 $query->where('user_id', Session::get('id'))

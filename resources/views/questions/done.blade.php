@@ -62,7 +62,7 @@
                                 @if($question->accepted_answer_id === 0)
                                     <span class="hidden-xs label label-warning">Open</span>
                                     <span class="visible-xs label label-warning" style="padding: .3em 0 .3em 0"><i class="fa fa-comments"></i></span>
-                                @elseif($question->accepted_answer_id === 1)
+                                @elseif($question->accepted_answer_id === 1 || $question->accepted_answer_id === 5)
                                     <span class="hidden-xs label label-success">Answered</span>
                                     <span class="visible-xs label label-warning" style="padding: .3em 0 .3em 0"><i class="fa fa-comments"></i></span>
                                 @elseif($question->accepted_answer_id === 2)

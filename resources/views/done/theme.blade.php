@@ -41,7 +41,7 @@
                                 <br/><span style="font-size: 1.7em">{{$question->votes}}</span><br/>votes<br/><br/>
                                 @if($question->accepted_answer_id == 0)
                                 <span class="hidden-xs label label-warning">Open</span>
-                                @elseif($question->accepted_answer_id == 1)
+                                @elseif($question->accepted_answer_id == 1 || $question->accepted_answer_id === 5)
                                 <span class="hidden-xs label label-success">Answered</span>
                                 @else
                                 <span class="hidden-xs label label-warning">Open pending</span>

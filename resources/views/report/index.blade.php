@@ -140,7 +140,7 @@
                     <td style="vertical-align:middle" value="{{$question->accepted_answer_id}}">
                         @if($question->accepted_answer_id === 0)
                         <span class="hidden-xs label label-warning">Open</span>
-                        @elseif($question->accepted_answer_id === 1)
+                        @elseif($question->accepted_answer_id === 1 || $question->accepted_answer_id === 5)
                         <span class="hidden-xs label label-success">Done</span>
                         @elseif($question->accepted_answer_id === 2)
                         <span class="hidden-xs label label-warning">Open pending</span>

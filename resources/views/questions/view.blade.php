@@ -156,7 +156,7 @@
     @if(Session::get('is_admin') === 1 || Session::get('is_admin') === 2 || Session::get('is_admin') === 3)
         
     <span class="tags pull-right">                     &nbsp;
-        @if($question->accepted_answer_id === 1 and $question->category_name === 'LEFO')
+        @if(($question->accepted_answer_id === 1 || $question->accepted_answer_id === 5) and $question->category_name === 'LEFO')
             @if($question->meeting === null)
             <a  onclick="$('#meeting').modal('show');" class="tag"><span class="label label-info">Set Meeting Date</span></a> 
             @else
@@ -168,7 +168,7 @@
         @endif
     </span>
     @elseif(Session::get('is_admin') === 0)
-        @if($question->accepted_answer_id === 1 and $question->category_name === 'LEFO')
+        @if(($question->accepted_answer_id === 1 || $question->accepted_answer_id === 5) and $question->category_name === 'LEFO')
             @if($question->meeting === null)
              <span class="tags pull-right">
                  Meeting:
@@ -217,7 +217,7 @@
                     @if($question->accepted_answer_id === 0)
                         <span class="hidden-xs label label-warning">Open</span>
                         <span class="visible-xs label label-warning" style="padding: .3em 0 .3em 0"><i class="fa fa-comments"></i></span>
-                    @elseif($question->accepted_answer_id === 1)
+                    @elseif($question->accepted_answer_id === 1 || $question->accepted_answer_id === 5)
                         <span class="hidden-xs label label-success">Answered</span>
                         <span class="visible-xs label label-warning" style="padding: .3em 0 .3em 0"><i class="fa fa-comments"></i></span>
                     @elseif($question->accepted_answer_id === 2)
@@ -319,7 +319,7 @@
 
 {{-- Rating --}}
 <div class="form-group">
-@if($question->accepted_answer_id === 1)
+@if($question->accepted_answer_id === 1 || $question->accepted_answer_id === 5)
     @if($question->post_rating === 0.0 and Session::get('id') === $question->user_id)
 <form action="{{url("/question/rating/".$question->id)}}">
 <div class="col-sm-12 poster">
@@ -825,7 +825,7 @@
     @extends('layouts.sidebar')
     @if($question->accepted_answer_id === 0 || $question->accepted_answer_id === 2)
     <button class="btn btn-block btn-primary" style="background-color: #f44336" onclick="$('#stop').modal('show');">Stop Request</button>
-    @elseif($question->accepted_answer_id === 1)
+    @elseif($question->accepted_answer_id === 1 || $question->accepted_answer_id === 5)
     @if(Session::get('is_admin') === 0)
         @if($question->additional_information === null)
         <button class="btn btn-block btn-primary" onclick="$('#info').modal('show');">Give Additional Information</button>
@@ -867,7 +867,7 @@
         <div class="col-sm-8">{{$first_post->votes}}</div>
     </div>
     <hr/>
-    @if($question->accepted_answer_id === 1)
+    @if($question->accepted_answer_id === 1 || $question->accepted_answer_id === 5)
     
     <h4>Update</h4>
         @if($question->additional_information !== null)

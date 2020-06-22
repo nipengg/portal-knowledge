@@ -149,7 +149,7 @@
                           <td>
                             @if($data->accepted_answer_id === 0)
                                 Open
-                            @elseif($data->accepted_answer_id === 1)
+                            @elseif($data->accepted_answer_id === 1 || $data->accepted_answer_id === 5)
                                 Done
                             @elseif($data->accepted_answer_id === 2)
                                 Open pending

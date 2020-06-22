@@ -11,8 +11,21 @@
     </style>
 </head>
 <body>
+    <script>
+        $(document).ready(function () {
+            $("#filter-picker").on('change', function(){
+                window.location.href = "{{url('/report/chart/?filter=')}}" + $("#filter-picker").val();
+            });
+        });
+    </script>
     <h2>Chart</h2>
     <hr/>
+    <div>
+        <select class="selectpicker" id="filter-picker" style="background: white !important;">
+            <option value="2020" {{$filter === '2020' ? 'selected' : ''}} >2020</option>
+            <option value="2019"  {{$filter === '2019' ? 'selected' : ''}} >2019</option>
+        </select>
+    </div>
     <br>
     <div class="row">
      <div class="col-md-10 col-md-offset-1">
@@ -35,23 +48,27 @@
      </div>
    </div>
       <script>
-      var url = "{{url('/chart')}}";
-      var name = new Array();
-      var proces = new Array();
+      var filter = {!! json_encode($filter) !!};    
+      var url = "{{url('/chart/:filter')}}";
+      url = url.replace(':filter', filter);
 
       $(document).ready(function(){
         $.get(url, function(response){
-          response.forEach(function(data){
-            proces.push(data.total);
-          });
-          var ctx = document.getElementById("canvas").getContext('2d');
-              var myChart = new Chart(ctx, {
+        //   response.forEach(function(data){
+        //     proces.push(data.total);
+        //   });
+        const labels = response.map(data => data.status);
+        const total = response.map(data => data.total);
+        const status = response.map(data => data.status);
+
+          const ctx = document.getElementById("canvas").getContext('2d');
+              const myChart = new Chart(ctx, {
                 type: 'pie',
                 data: {
-                    labels: ['Total project', 'Done On Time', 'Done Over Time', 'Progress', 'Cancel'],
+                    labels: status,
                     datasets: [{
                         label: 'All',
-                        data: proces,
+                        data: total,
                         borderWidth: 1,
                         backgroundColor: [
                         'rgba(54, 162, 235)',
@@ -59,6 +76,7 @@
                         'rgba(255,0,0)',
                         'rgba(255,140,0)',
                         'rgba(148,0,211)',
+                        'rgba(255,192,203)',
                         ],
                     }]
                 },
@@ -77,20 +95,26 @@
       </script>
 
 <script>
-    var url = "{{url('/chart')}}";
-    var name = new Array();
-    var total = new Array();
+    // var url = "{{url('/chart')}}";
+    // var name = new Array();
+    // var total = new Array();
 
     $(document).ready(function(){
       $.get(url, function(response){
-        response.forEach(function(data){
-          total.push(data.total);
-        });
-        var ctx = document.getElementById("canvas2").getContext('2d');
-            var myChart = new Chart(ctx, {
+        // response.forEach(function(data){
+        //   total.push(data.total);
+        // });
+
+        const url = "{{url('/chart')}}";  
+        const labels = response.map(data => data.status);
+        const total = response.map(data => data.total);
+        const status = response.map(data => data.status);
+
+        const ctx = document.getElementById("canvas2").getContext('2d');
+            const myChart = new Chart(ctx, {
               type: 'bar',
               data: {
-                  labels: ['Total project', 'Done On Time', 'Done Over Time', 'Progress', 'Cancel'],
+                  labels: status,
                   datasets: [{
                       label: 'All',
                       data: total,
@@ -101,6 +125,7 @@
                       'rgba(255,0,0)',
                       'rgba(255,140,0)',
                       'rgba(148,0,211)',
+                      'rgba(255,192,203)',
                       ],
                   }]
               },
