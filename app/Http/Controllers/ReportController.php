@@ -393,9 +393,9 @@ class ReportController extends Controller
 
     public function chart($filter)
     {
-        $result = DB::table('questions')
+        $chart = DB::table('questions')
                     ->select('accepted_answer_ids.id as status_id','accepted_answer_ids.status')
-		            ->addSelect(DB::raw('COUNT(accepted_answer_id) as total'))
+                    ->addSelect(DB::raw('COUNT(accepted_answer_id) as total'))
 		            ->rightjoin('accepted_answer_ids', function($join) {
 			            $join->on('accepted_answer_ids.id', '=', 'questions.accepted_answer_id');
                         })
@@ -404,9 +404,13 @@ class ReportController extends Controller
                     ->get();
                     
         $total = DB::table('questions')
-		            ->addSelect(DB::raw('COUNT(id)'))
-		            ->from('questions')
+                    ->select(DB::raw("count(id) as total, '00' as status_id, 'All Status' as status"))
+                    ->from('questions')
+                    ->whereYEAR('created_at', '=', $filter)
                     ->get();
+
+        $merged = $chart->merge($total);
+        $result = $merged->all();
                     
         return response()->json($result);
     }

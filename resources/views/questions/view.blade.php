@@ -891,6 +891,8 @@
     <div class="row hidden-xs">
         <div class="col-sm-5" style="color:gray">Reason stop</div>
         <div class="col-sm-5">{{$question->additional_information_admin}}</div>
+        <div class="col-sm-5" style="color:gray">Footnote User</div>
+        <div class="col-sm-5">{{$question->additional_information}}</div>
     </div>
     <hr/>
     @endif
