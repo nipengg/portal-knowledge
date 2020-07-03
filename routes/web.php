@@ -68,7 +68,7 @@ Route::get('/users/delete/{id}', 'UserController@destroy');
 
 Route::get('/report', 'ReportController@index');
 Route::get('/report/chart', 'ReportController@indexChart');
-Route::get('/chart/{filter}', 'ReportController@chart');
+Route::get('/chart', 'ReportController@chart');
 Route::get('/report/excel', 'ReportController@excel');
 Route::get('/report/pdf', 'ReportController@pdf');
 

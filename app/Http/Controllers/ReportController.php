@@ -391,39 +391,49 @@ class ReportController extends Controller
     })->export('xlsx');
     }
 
-    public function chart($filter)
+    public function chart(Request $request)
     {
+        $year = $request->year;
+        $quarter = $request->quarter;
+        $chartType = $request->chartType;
         $chart = DB::table('questions')
                     ->select('accepted_answer_ids.id as status_id','accepted_answer_ids.status')
                     ->addSelect(DB::raw('COUNT(accepted_answer_id) as total'))
 		            ->rightjoin('accepted_answer_ids', function($join) {
 			            $join->on('accepted_answer_ids.id', '=', 'questions.accepted_answer_id');
                         })
-                    ->whereYEAR('questions.created_at', '=', $filter)
-                    ->groupBy('accepted_answer_ids.id')
-                    ->get();
-                    
+                    ->whereYEAR('questions.created_at', '=', $year)
+                    ->groupBy('accepted_answer_ids.id');
+
         $total = DB::table('questions')
                     ->select(DB::raw("count(id) as total, '00' as status_id, 'All Status' as status"))
                     ->from('questions')
-                    ->whereYEAR('created_at', '=', $filter)
-                    ->get();
+                    ->whereYEAR('created_at', '=', $year);
 
-        $merged = $chart->merge($total);
-        $result = $merged->all();
+        if($quarter > 0){
+            $chart = $chart->where(DB::raw('QUARTER(questions.created_at)'), $quarter);   
+            $total = $total->where(DB::raw('QUARTER(questions.created_at)'), $quarter);         
+        }  
+
+        if($chartType === 'bar') {    
+            $merged = $total->get()->merge($chart->get());
+            $result = $merged->all();
+        }elseif ($chartType === 'pie') {
+            $result = $chart->get();
+        }
                     
         return response()->json($result);
     }
 
     public function indexChart(Request $request){
         $data = [];
-        $data['filter'] = $request->filter ?: '2020';
-        $filter = $data['filter'];
+        $data['year'] = $request->year ?: '2020';
+        $year = $data['year'];
         $data['page'] = $request->page ?: 1;
         $page = $data['page'];
         $data['limit'] = $request->limit ?: 10;
    
-        if($data['filter'] == '2020'){
+        if($data['year'] == '2020'){
             $questions = Question::orderBy('created_at', 'desc')
                             ->whereYear('created_at', 2020);
         } else{
@@ -431,11 +441,9 @@ class ReportController extends Controller
                             ->whereYear('created_at', 2019);
         }
         $questions = $questions->paginate(5);
-        $questions->setPath(url("/report/chart/?filter=$filter"));
-        $data['filter'] = $filter;
+        $questions->setPath(url("/report/chart/?year=$year"));
+        $data['year'] = $year;
         $data['questions'] = $questions;
-        $selected_year = $request->input('year');
-        $data['chart_data'] = $this->chart($selected_year);
 
         if(Session::get('is_admin') === 0 || Session::has('username') === false) {
             $request->session()->flash('notification', TRUE);
